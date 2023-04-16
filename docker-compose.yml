@@ -1,0 +1,15 @@
+version: '3.3'
+services:
+  startrek:
+    container_name: startrek
+    image: continuumio/anaconda3
+    working_dir: /workspace
+    tty: true
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ./:/workspace
