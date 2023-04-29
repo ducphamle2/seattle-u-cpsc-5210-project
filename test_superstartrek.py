@@ -11,9 +11,9 @@ class Testing(TestCase):
         ("ended", -1, True),
         ("not ended", 5, False),
     ])
-    def test_mock_has_mission_ended(self, name, p1, p2):
+    def test_mock_has_mission_ended(self, __name__, p1, p2):
         world = World()
-        world.remaining_time = MagicMock(name='remaining_time')
+        world.remaining_time = MagicMock()
         world.remaining_time.return_value = p1
         self.assertEqual(world.has_mission_ended(), p2)
 
