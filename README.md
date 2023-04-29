@@ -25,10 +25,10 @@ docker-compose exec startrek sh
 ```python
 
 # run all tests
-pytest
+python -m pytest tests/ -s
 
 # code coverage
-pytest --cov=/workspace ./
+python -m pytest --cov=/workspace ./
 ```
 
 ## TIPS: you can use Remote Container VSCode extension to open the container with VSCode for local development
