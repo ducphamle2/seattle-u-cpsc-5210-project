@@ -1,21 +1,30 @@
-from superstartrek import World
+from superstartrek import World, Ship
 import unittest
 from unittest import TestCase
 from unittest.mock import MagicMock
 from parameterized import parameterized
 
 
-class Testing(TestCase):
+class TestingShip(TestCase):
+
+    def test_ship_refill(self):
+        ship = Ship()
+        ship.refill()
+        self.assertEqual(ship.energy_capacity, 3000)
+        self.assertEqual(ship.torpedo_capacity, 10)
 
     @parameterized.expand([
-        ("ended", -1, True),
-        ("not ended", 5, False),
+        ("energy_greater_than_0_nominal", 1500, 0, 1490, 0),
+        ("energy_equal_0_on_boundary", 2990, 0, 0, 0), 
+        ("energy_smaller_0_off_boundary_lower", 3000, 0, 0, 0),
+        # ("energy_smaller_0_off_boundary_lower_shield_test", 3000, 0, 0, 0),
     ])
-    def test_mock_has_mission_ended(self, __name__, p1, p2):
-        world = World()
-        world.remaining_time = MagicMock()
-        world.remaining_time.return_value = p1
-        self.assertEqual(world.has_mission_ended(), p2)
+    def test_manuver_energy(self, __name__, n, shield_value, expected_energy, expected_shield):
+        ship = Ship()
+        ship.shields = shield_value
+        ship.maneuver_energy(n)
+        self.assertEqual(ship.energy, expected_energy)
+        self.assertEqual(ship.shields, expected_shield)
 
 
 if __name__ == '__main__':
