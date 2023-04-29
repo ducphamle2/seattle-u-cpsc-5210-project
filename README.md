@@ -14,6 +14,12 @@ docker build -t cpsc5210-startrek .
 docker-compose up -d
 ```
 
+## 4. Start The container shell
+
+```bash
+docker-compose exec startrek sh
+```
+
 ## 4. Run tests
 
 ```python
