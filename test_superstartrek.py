@@ -13,7 +13,7 @@ class Testing(TestCase):
                 world = World()
                 world.remaining_time = MagicMock(name='remaining_time')
                 world.remaining_time.return_value = p1
-                assert world.has_mission_ended() == p2
+                self.assertEqual(world.has_mission_ended(), p2)
 
 
 if __name__ == '__main__':
