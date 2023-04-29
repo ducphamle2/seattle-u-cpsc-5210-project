@@ -31,4 +31,8 @@ python -m unittest
 python -m coverage report
 ```
 
+### NOTES:
+
+You should make sure the python version is python:3.9.16, which is specified in the Dockerfile. Using other python versions will lead to unexpected errors
+
 ## TIPS: you can use Remote Container VSCode extension to open the container with VSCode for local development
