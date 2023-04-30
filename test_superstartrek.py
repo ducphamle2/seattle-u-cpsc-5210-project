@@ -2,6 +2,8 @@ from superstartrek import World, Ship
 import unittest
 from unittest import TestCase
 from unittest.mock import MagicMock
+import sys 
+import io
 from parameterized import parameterized
 
 
@@ -25,6 +27,20 @@ class TestingShip(TestCase):
         ship.maneuver_energy(n)
         self.assertEqual(ship.energy, expected_energy)
         self.assertEqual(ship.shields, expected_shield)
+
+    
+    @parameterized.expand([
+        ("damage_stats[6]_equals_minus_1_on_boundary", -1),
+        ("damage_stats[6]_equals_minus_10_off_boundary_lower", -10)
+    ])
+    def test_shield_control_damage_stats_6_less_than_0(self, __name__, damage_stats):
+        ship = Ship()
+        ship.damage_stats[6] = damage_stats
+        captured_output = io.StringIO()                  # Create StringIO object
+        sys.stdout = captured_output                     #  and redirect stdout.
+        ship.shield_control()                                  # Call function.
+        sys.stdout = sys.__stdout__                     # Reset redirect.
+        self.assertEqual(captured_output.getvalue(), 'SHIELD CONTROL INOPERABLE\n')
 
 
 if __name__ == '__main__':
