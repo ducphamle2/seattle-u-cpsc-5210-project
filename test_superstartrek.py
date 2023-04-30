@@ -1,8 +1,11 @@
-from superstartrek import Point, Position, World, Ship
 import unittest
+import sys
+from superstartrek import Point, Position, Ship
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from parameterized import parameterized
+from superstartrek import Ship
+from io import StringIO
 
 
 class TestingShip(TestCase):
@@ -48,6 +51,60 @@ class TestingShip(TestCase):
         self.assertEqual(ship.damage_stats, [0, 0, 0, 0, 0, 0, 0, 0])
         self.assertEqual(ship.shields, 0)
 
+    @parameterized.expand([
+        ('shields_input_greater_than_0_valid', '1', 1),
+        ('shields_input_smaller_than_energy_plus_shields_valid','100', 100),   
+        ('shields_valid_value','50', 50),         
+    ])
+    def test_shield_control_shields_valid_input(self, __name__, input_value, expected_shields):
+        ship = Ship()
+        initial_energy = 101  #energy start value, considered as an upper boundary for shields 
+        ship.energy = initial_energy
+        initial_shileds = ship.shields
+        
+        with patch('builtins.input', return_value=input_value):
+            with StringIO() as buffer:
+                sys.stdout = buffer
+                ship.shield_control()
+                output = buffer.getvalue()
+
+                assert ship.energy == initial_energy + initial_shileds - int(input_value)
+                assert expected_shields == ship.shields
+
+                assert "DEFLECTOR CONTROL ROOM REPORT:" in output
+                assert f"  'SHIELDS NOW AT {ship.shields} UNITS PER YOUR COMMAND.'" in output
+
+                sys.stdout = sys.__stdout__
+
+
+    @parameterized.expand([
+        ('abc',),
+        ('1.2',), 
+    ])
+    def test_shield_control_raises_value_error_with_invalid_shields_input(self, input_value):
+        ship = Ship()
+        with patch('builtins.input', return_value=input_value):
+            with self.assertRaises(ValueError) as context:
+                ship.shield_control()
+            
+            self.assertEqual(str(context.exception), f"invalid literal for int() with base 10: '{input_value}'")
+
+
+    def test_shield_control_shields_valid_input_very_large(self):
+        ship = Ship()
+        initial_energy = 99999999999999999999999999999999999999999999999999999999999999999999999999999999
+        initial_shileds = ship.shields
+        ship.energy = initial_energy
+        # choose x smaller than initial_energy so it would be valid
+        x = '99999999999999999999999999999999999999999999999999999999999999999999999999999998'
+        x_int = int(x)
+        with patch('builtins.input', return_value=x):
+                ship.shield_control()
+
+                assert ship.shields == x_int
+                assert ship.energy == initial_energy + initial_shileds - x_int
+
 
 if __name__ == '__main__':
     unittest.main()
+
