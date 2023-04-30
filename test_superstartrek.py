@@ -1,7 +1,7 @@
-from superstartrek import World, Ship
+from superstartrek import Point, Position, World, Ship
 import unittest
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from parameterized import parameterized
 
 
@@ -25,6 +25,28 @@ class TestingShip(TestCase):
         ship.maneuver_energy(n)
         self.assertEqual(ship.energy, expected_energy)
         self.assertEqual(ship.shields, expected_shield)
+        
+        
+    @patch('star_trek_game.fnr', return_value=4)
+    def ship_initializer(self):
+        
+        expected_devices = ("WARP ENGINES",
+            "SHORT RANGE SENSORS",
+            "LONG RANGE SENSORS",
+            "PHASER CONTROL",
+            "PHOTON TUBES",
+            "DAMAGE CONTROL",
+            "SHIELD CONTROL",
+            "LIBRARY-COMPUTER",)
+        
+        ship = Ship()
+        self.assertEqual(ship.position, Position(Point(4, 4), Point(4, 4)))
+        self.assertEqual(ship.energy, 3000)
+        self.assertEqual(ship.torpedoes, 10)
+        self.assertEqual(ship.docked, False)
+        self.assertEqual(ship.devices, expected_devices)
+        self.assertEqual(ship.damage_stats, [0, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(ship.shields, 0)
 
 
 if __name__ == '__main__':
