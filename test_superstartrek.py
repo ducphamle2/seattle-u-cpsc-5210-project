@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import sys 
 import io
 from parameterized import parameterized
+from unittest.mock import patch
 
 
 class TestingShip(TestCase):
@@ -41,7 +42,45 @@ class TestingShip(TestCase):
         ship.shield_control()                                  # Call function.
         sys.stdout = sys.__stdout__                     # Reset redirect.
         self.assertEqual(captured_output.getvalue(), 'SHIELD CONTROL INOPERABLE\n')
+    
+    @parameterized.expand([
+        ("input_energy_value_minus_50_off_boundary_lower", '-50'),
+        ("input_energy_value_minus_1_on_boundary", '-1')
+    ])
+    def test_shield_control_x_less_than_zero(self, __name__, input_value):
+        ship = Ship()
+        ship.damage_stats[6] = 6 # damage_stats[6] must have a positive value for this test.
+        captured_output = io.StringIO()                  # Create StringIO object
+        sys.stdout = captured_output        
+        with patch('builtins.input', return_value=input_value):
+            ship.shield_control()
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue(), '<SHIELDS UNCHANGED>\n')
+    
+    def test_shield_control_shields_equals_x(self):
+        ship = Ship()
+        ship.damage_stats[6] = 6 #damage stats must be positive for this test
+        ship.shields = 265
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        with patch('builtins.input', return_value='265'):
+            ship.shield_control()
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue(), '<SHIELDS UNCHANGED>\n')
 
+    def test_shield_control_x_greater_than_energy_plus_shields(self):
+        ship = Ship()
+        ship.damage_stats[6] = 6 # damage stats must be positive for this test
+        ship.shields = 300
+        ship.energy = 500
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        with patch('builtins.input', return_value='1000'):
+            ship.shield_control()
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue(), "SHIELD CONTROL REPORTS  'THIS IS NOT THE FEDERATION "
+                "TREASURY.'\n"
+                "<SHIELDS UNCHANGED>\n")   
 
 if __name__ == '__main__':
     unittest.main()
