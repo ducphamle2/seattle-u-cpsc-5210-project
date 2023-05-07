@@ -658,6 +658,7 @@ class Game:
             self.world.charted_galaxy_map,
         )
 
+    ##################################################### Navigation methods
     def navigation_process_course_data(self, dirs_len: int):
         cd = get_user_float("COURSE (1-9)? ") - 1  # Convert to 0-8
         if cd == dirs_len - 1:
@@ -915,6 +916,7 @@ class Game:
         )
         ship.maneuver_energy(warp_rounds)
 
+    ######################################## damage control methods
     def damage_control_process_display_damage_control_report(self, damage_stats: List[float], devices: Tuple[str]):
         if damage_stats[5] < 0:
             print("DAMAGE CONTROL REPORT NOT AVAILABLE")
@@ -940,6 +942,11 @@ class Game:
         )
         return damage_sum, True
     
+    def damage_control_reset_damage_stats(self, damage_stats: List[float]):
+        for i in range(8):
+            if damage_stats[i] < 0:
+                damage_stats[i] = 0
+    
     def damage_control(self) -> None:
         """Print a damage control report."""
         ship = self.world.ship
@@ -955,9 +962,7 @@ class Game:
         if input("WILL YOU AUTHORIZE THE REPAIR ORDER (Y/N)? ").upper().strip() != "Y":
             return
 
-        for i in range(8):
-            if ship.damage_stats[i] < 0:
-                ship.damage_stats[i] = 0
+        self.damage_control_reset_damage_stats(ship.damage_stats)
         self.world.stardate += damage_sum + 0.1
 
     def computer(self) -> None:
