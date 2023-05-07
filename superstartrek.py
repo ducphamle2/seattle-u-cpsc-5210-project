@@ -658,6 +658,101 @@ class Game:
             self.world.charted_galaxy_map,
         )
 
+    ##################################################### Navigation methods
+    def navigation_process_course_data(self, dirs_len: int):
+        cd = get_user_float("COURSE (1-9)? ") - 1  # Convert to 0-8
+        if cd == dirs_len - 1:
+            cd = 0
+        if cd < 0 or cd >= dirs_len:
+            print("   LT. SULU REPORTS, 'INCORRECT COURSE DATA, SIR!'")
+            return cd, False
+        return cd, True
+    
+    def navigation_process_warp(self, damage_stat: float):
+        warp = get_user_float(
+            f"WARP FACTOR (0-{'0.2' if damage_stat < 0 else '8'})? "
+        )
+        if damage_stat < 0 and warp > 0.2:
+            print("WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2")
+            return warp, False
+        if warp == 0:
+            return warp, False
+        if warp < 0 or warp > 8:
+            print(
+                f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP {warp}!'"
+            )
+            return warp, False
+        return warp, True
+    
+    def navigation_process_warp_rounds(self, warp: float, ship_shields: int, ship_energy: int, damage_stat: float):
+        warp_rounds = round(warp * 8)
+        if ship_energy >= warp_rounds:
+            return warp_rounds, True
+        print("ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE")
+        print(f"                       FOR MANEUVERING AT WARP {warp}!'")
+        if ship_shields >= warp_rounds - ship_energy and damage_stat >= 0:
+            print(
+                f"DEFLECTOR CONTROL ROOM ACKNOWLEDGES {ship_shields} UNITS OF ENERGY"
+            )
+            print("                         PRESENTLY DEPLOYED TO SHIELDS.")
+        return warp_rounds, False
+    
+    def navigation_klingon_ship_move(self, quadrant: Quadrant, klingon_ships: List[KlingonShip]):
+        # klingons move and fire
+        for klingon_ship in klingon_ships:
+            if klingon_ship.shield != 0:
+                quadrant.set_value(
+                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.void
+                )
+                (
+                    klingon_ship.sector.x,
+                    klingon_ship.sector.y,
+                ) = quadrant.find_empty_place()
+                quadrant.set_value(
+                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.klingon
+                )
+    def navigation_check_world_has_ended(self, world: World):
+        if world.has_mission_ended():
+            self.end_game(won=False, quit=False)
+            return True
+        return False
+    
+    def navigation_calculate_world_stardate(self, warp: float, stardate: float):
+        if warp < 1:
+            return stardate + 0.1 * int(10 * warp)
+        return stardate + 1
+    
+    def navigation_repair_damage_devices(self, warp: float, damage_stats: List[float], devices: List[str]):
+        line = ""
+        for i in range(8):
+            if damage_stats[i] >= 0:
+                continue
+            damage_stats[i] += min(warp, 1)
+            if damage_stats[i] <= -0.1:
+                continue
+            if damage_stats[i] < 0:
+                damage_stats[i] = -0.1
+                continue
+            if len(line) == 0:
+                line = "DAMAGE CONTROL REPORT:"
+            line += f"   {devices[i]} REPAIR COMPLETED\n"
+        return line
+    
+    def navigation_print_damage_report(self, damage_stats: List[float], devices: List[str]):
+        if random.random() > 0.2:
+            return
+        device = fnr()
+        if random.random() < 0.6:
+            damage_stats[device] -= random.random() * 5 + 1
+            print(f"DAMAGE CONTROL REPORT:   {devices[device]} DAMAGED\n")
+            return
+        
+        damage_stats[device] += random.random() * 3 + 1
+        print(
+            f"DAMAGE CONTROL REPORT:   {devices[device]} STATE OF REPAIR IMPROVED\n"
+        )
+        return
+
     def navigation(self) -> None:
         """
         Take navigation input and move the Enterprise.
@@ -666,87 +761,97 @@ class Game:
         """
         world = self.world
         ship = world.ship
+        
 
-        cd = get_user_float("COURSE (1-9)? ") - 1  # Convert to 0-8
-        if cd == len(dirs) - 1:
-            cd = 0
-        if cd < 0 or cd >= len(dirs):
-            print("   LT. SULU REPORTS, 'INCORRECT COURSE DATA, SIR!'")
+        cd, is_course_data_valid = self.navigation_process_course_data(len(dirs))
+        if is_course_data_valid is False:
+            return
+        
+        warp, is_warp_valid = self.navigation_process_warp(ship.damage_stats[0])
+        if is_warp_valid is False:
             return
 
-        warp = get_user_float(
-            f"WARP FACTOR (0-{'0.2' if ship.damage_stats[0] < 0 else '8'})? "
-        )
-        if ship.damage_stats[0] < 0 and warp > 0.2:
-            print("WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2")
+        warp_rounds, is_warp_rounds_valid = self.navigation_process_warp_rounds(warp, ship.shields, ship.energy, ship.damage_stats[6])
+        if is_warp_rounds_valid is False:
             return
-        if warp == 0:
-            return
-        if warp < 0 or warp > 8:
-            print(
-                f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP {warp}!'"
-            )
-            return
+        
+        # klingons move
+        self.navigation_klingon_ship_move(world.quadrant, self.world.quadrant.klingon_ships)
 
-        warp_rounds = round(warp * 8)
-        if ship.energy < warp_rounds:
-            print("ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE")
-            print(f"                       FOR MANEUVERING AT WARP {warp}!'")
-            if ship.shields >= warp_rounds - ship.energy and ship.damage_stats[6] >= 0:
-                print(
-                    f"DEFLECTOR CONTROL ROOM ACKNOWLEDGES {ship.shields} UNITS OF ENERGY"
-                )
-                print("                         PRESENTLY DEPLOYED TO SHIELDS.")
-            return
-
-        # klingons move and fire
-        for klingon_ship in self.world.quadrant.klingon_ships:
-            if klingon_ship.shield != 0:
-                world.quadrant.set_value(
-                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.void
-                )
-                (
-                    klingon_ship.sector.x,
-                    klingon_ship.sector.y,
-                ) = world.quadrant.find_empty_place()
-                world.quadrant.set_value(
-                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.klingon
-                )
-
+        # klingons fire
         self.klingons_fire()
-
-        # repair damaged devices and print damage report
-        line = ""
-        for i in range(8):
-            if ship.damage_stats[i] < 0:
-                ship.damage_stats[i] += min(warp, 1)
-                if -0.1 < ship.damage_stats[i] < 0:
-                    ship.damage_stats[i] = -0.1
-                elif ship.damage_stats[i] >= 0:
-                    if len(line) == 0:
-                        line = "DAMAGE CONTROL REPORT:"
-                    line += f"   {ship.devices[i]} REPAIR COMPLETED\n"
+        # repair damaged devices
+        line = self.navigation_repair_damage_devices(warp, ship.damage_stats, ship.devices)
         if len(line) > 0:
             print(line)
-        if random.random() <= 0.2:
-            device = fnr()
-            if random.random() < 0.6:
-                ship.damage_stats[device] -= random.random() * 5 + 1
-                print(f"DAMAGE CONTROL REPORT:   {ship.devices[device]} DAMAGED\n")
-            else:
-                ship.damage_stats[device] += random.random() * 3 + 1
-                print(
-                    f"DAMAGE CONTROL REPORT:   {ship.devices[device]} STATE OF REPAIR IMPROVED\n"
-                )
+        # print damage report
+        self.navigation_print_damage_report(ship.damage_stats, ship.devices)
 
         self.move_ship(warp_rounds, cd)
-        world.stardate += 0.1 * int(10 * warp) if warp < 1 else 1
-        if world.has_mission_ended():
-            self.end_game(won=False, quit=False)
+        world.stardate = self.navigation_calculate_world_stardate(warp, world.stardate)
+        if self.navigation_check_world_has_ended(world):
             return
-
         self.short_range_scan()
 
+    def move_ship_verify_hit_edge_calculating_final_position(self, quadrant: Point, sector: Point):
+        hit_edge = False
+        if quadrant.x < 0:
+            hit_edge = True
+            quadrant.x = sector.x = 0
+        if quadrant.x > 7:
+            hit_edge = True
+            quadrant.x = sector.x = 7
+        if quadrant.y < 0:
+            hit_edge = True
+            quadrant.y = sector.y = 0
+        if quadrant.y > 7:
+            hit_edge = True
+            quadrant.y = sector.y = 7
+        return hit_edge
+    
+    def move_ship_calculate_ship_position_quadrant_limits(self, quadrant: Point, sector: Point, sector_start_x: float, sector_start_y: float):
+        quadrant.x = int(sector_start_x / 8)
+        quadrant.y = int(sector_start_y / 8)
+        sector.x = int(
+            sector_start_x - quadrant.x * 8
+        )
+        sector.y = int(
+            sector_start_y - quadrant.y * 8
+        )
+        if sector.x < 0:
+            quadrant.x -= 1
+            sector.x = 7
+        if sector.y < 0:
+            quadrant.y -= 1
+            sector.y = 7
+
+    def move_ship_is_stay_in_quadrant(self, quadrant: Point, start_quadrant: Point):
+        stayed_in_quadrant = (
+            quadrant.x == start_quadrant.x
+            and quadrant.y == start_quadrant.y
+        )
+        if stayed_in_quadrant:
+            return True
+        return False
+    
+    def move_ship_calculate_direction(self, dirs: list[list[int]], cd: float, dirs_index: int):
+        cdi = int(cd)
+        return dirs[cdi][0] + (dirs[cdi + 1][dirs_index] - dirs[cdi][dirs_index]) * (cd - cdi)
+    
+    def move_ship_increment_sector(self, quadrant_direction: int, warp_rounds: float, direction: float):
+        return quadrant_direction * 8 + warp_rounds * direction
+    
+    def move_ship_shut_down_sector_bad_navigation(self, sector: Point, entity: Entity, dx: float, dy: float):
+        if entity == Entity.void:
+            return False
+        sector.x = int(sector.x - dx)
+        sector.y = int(sector.y - dy)
+        print(
+            "WARP ENGINES SHUT DOWN AT SECTOR "
+            f"{sector} DUE TO BAD NAVIGATION"
+        )
+        return True
+    
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
         assert cd < len(dirs) - 1
@@ -756,11 +861,9 @@ class Game:
         world.quadrant.set_value(
             int(ship.position.sector.x), int(ship.position.sector.y), Entity.void
         )
-        cdi = int(cd)
-
         # Interpolate direction:
-        dx = dirs[cdi][0] + (dirs[cdi + 1][0] - dirs[cdi][0]) * (cd - cdi)
-        dy = dirs[cdi][1] + (dirs[cdi + 1][1] - dirs[cdi][1]) * (cd - cdi)
+        dx = self.move_ship_calculate_direction(dirs, cd, 0)
+        dy = self.move_ship_calculate_direction(dirs, cd, 1)
 
         start_quadrant = Point(ship.position.quadrant.x, ship.position.quadrant.y)
         sector_start_x: float = ship.position.sector.x
@@ -777,36 +880,11 @@ class Game:
                 or ship.position.sector.y > 7
             ):
                 # exceeded quadrant limits; calculate final position
-                sector_start_x += ship.position.quadrant.x * 8 + warp_rounds * dx
-                sector_start_y += ship.position.quadrant.y * 8 + warp_rounds * dy
-                ship.position.quadrant.x = int(sector_start_x / 8)
-                ship.position.quadrant.y = int(sector_start_y / 8)
-                ship.position.sector.x = int(
-                    sector_start_x - ship.position.quadrant.x * 8
-                )
-                ship.position.sector.y = int(
-                    sector_start_y - ship.position.quadrant.y * 8
-                )
-                if ship.position.sector.x < 0:
-                    ship.position.quadrant.x -= 1
-                    ship.position.sector.x = 7
-                if ship.position.sector.y < 0:
-                    ship.position.quadrant.y -= 1
-                    ship.position.sector.y = 7
+                sector_start_x += self.move_ship_increment_sector(ship.position.quadrant.x, warp_rounds, dx)
+                sector_start_y += self.move_ship_increment_sector(ship.position.quadrant.y, warp_rounds, dy)
+                self.move_ship_calculate_ship_position_quadrant_limits(ship.position.quadrant, ship.position.sector, sector_start_x, sector_start_y)
 
-                hit_edge = False
-                if ship.position.quadrant.x < 0:
-                    hit_edge = True
-                    ship.position.quadrant.x = ship.position.sector.x = 0
-                if ship.position.quadrant.x > 7:
-                    hit_edge = True
-                    ship.position.quadrant.x = ship.position.sector.x = 7
-                if ship.position.quadrant.y < 0:
-                    hit_edge = True
-                    ship.position.quadrant.y = ship.position.sector.y = 0
-                if ship.position.quadrant.y > 7:
-                    hit_edge = True
-                    ship.position.quadrant.y = ship.position.sector.y = 7
+                hit_edge = self.move_ship_verify_hit_edge_calculating_final_position(ship.position.quadrant, ship.position.sector)
                 if hit_edge:
                     print("LT. UHURA REPORTS MESSAGE FROM STARFLEET COMMAND:")
                     print("  'PERMISSION TO ATTEMPT CROSSING OF GALACTIC PERIMETER")
@@ -816,30 +894,17 @@ class Game:
                         f"  AT SECTOR {ship.position.sector} OF "
                         f"QUADRANT {ship.position.quadrant}.'"
                     )
-                    if world.has_mission_ended():
-                        self.end_game(won=False, quit=False)
+                    if self.navigation_check_world_has_ended(world):
                         return
 
-                stayed_in_quadrant = (
-                    ship.position.quadrant.x == start_quadrant.x
-                    and ship.position.quadrant.y == start_quadrant.y
-                )
-                if stayed_in_quadrant:
+                if self.move_ship_is_stay_in_quadrant(ship.position.quadrant, start_quadrant):
                     break
                 world.stardate += 1
                 ship.maneuver_energy(warp_rounds)
                 self.new_quadrant()
                 return
             ship_sector = self.world.ship.position.sector
-            ship_x = int(ship_sector.x)
-            ship_y = int(ship_sector.y)
-            if self.world.quadrant.data[ship_x][ship_y] != Entity.void:
-                ship_sector.x = int(ship_sector.x - dx)
-                ship_sector.y = int(ship_sector.y - dy)
-                print(
-                    "WARP ENGINES SHUT DOWN AT SECTOR "
-                    f"{ship_sector} DUE TO BAD NAVIGATION"
-                )
+            if self.move_ship_shut_down_sector_bad_navigation(ship_sector, self.world.quadrant.data[int(ship_sector.x)][int(ship_sector.y)], dx, dy):
                 break
         else:
             ship.position.sector.x, ship.position.sector.y = int(
@@ -851,40 +916,53 @@ class Game:
         )
         ship.maneuver_energy(warp_rounds)
 
-    def damage_control(self) -> None:
-        """Print a damage control report."""
-        ship = self.world.ship
-
-        if ship.damage_stats[5] < 0:
+    ######################################## damage control methods
+    def damage_control_process_display_damage_control_report(self, damage_stats: List[float], devices: Tuple[str]):
+        if damage_stats[5] < 0:
             print("DAMAGE CONTROL REPORT NOT AVAILABLE")
-        else:
-            print("\nDEVICE             STATE OF REPAIR")
-            for r1 in range(8):
-                print(
-                    f"{ship.devices[r1].ljust(26, ' ')}{int(ship.damage_stats[r1] * 100) * 0.01:g}"
-                )
-            print()
-
-        if not ship.docked:
             return
+        print("\nDEVICE             STATE OF REPAIR")
+        for r1 in range(8):
+            print(
+                f"{devices[r1].ljust(26, ' ')}{int(damage_stats[r1] * 100) * 0.01:g}"
+            )
+        print()
 
-        damage_sum = sum(0.1 for i in range(8) if ship.damage_stats[i] < 0)
+    def damage_control_calculate_damage_sum(self, damage_stats: List[float], delay_in_repairs_at_base: float):
+        damage_sum = sum(0.1 for i in range(8) if damage_stats[i] < 0)
         if damage_sum == 0:
-            return
+            return damage_sum, False
 
-        damage_sum += self.world.quadrant.delay_in_repairs_at_base
+        damage_sum += delay_in_repairs_at_base
         if damage_sum >= 1:
             damage_sum = 0.9
         print("\nTECHNICIANS STANDING BY TO EFFECT REPAIRS TO YOUR SHIP;")
         print(
             f"ESTIMATED TIME TO REPAIR: {round(0.01 * int(100 * damage_sum), 2)} STARDATES"
         )
+        return damage_sum, True
+    
+    def damage_control_reset_damage_stats(self, damage_stats: List[float]):
+        for i in range(8):
+            if damage_stats[i] < 0:
+                damage_stats[i] = 0
+    
+    def damage_control(self) -> None:
+        """Print a damage control report."""
+        ship = self.world.ship
+        self.damage_control_process_display_damage_control_report(ship.damage_stats, ship.devices)
+
+        if not ship.docked:
+            return
+        
+        damage_sum, need_to_repair_ship = self.damage_control_calculate_damage_sum(ship.damage_stats, self.world.quadrant.delay_in_repairs_at_base)
+        if not need_to_repair_ship:
+            return
+
         if input("WILL YOU AUTHORIZE THE REPAIR ORDER (Y/N)? ").upper().strip() != "Y":
             return
 
-        for i in range(8):
-            if ship.damage_stats[i] < 0:
-                ship.damage_stats[i] = 0
+        self.damage_control_reset_damage_stats(ship.damage_stats)
         self.world.stardate += damage_sum + 0.1
 
     def computer(self) -> None:
