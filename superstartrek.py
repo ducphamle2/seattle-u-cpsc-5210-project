@@ -840,6 +840,17 @@ class Game:
     def move_ship_increment_sector(self, quadrant_direction: int, warp_rounds: float, direction: float):
         return quadrant_direction * 8 + warp_rounds * direction
     
+    def move_ship_shut_down_sector_bad_navigation(self, sector: Point, entity: Entity, dx: float, dy: float):
+        if entity == Entity.void:
+            return False
+        sector.x = int(sector.x - dx)
+        sector.y = int(sector.y - dy)
+        print(
+            "WARP ENGINES SHUT DOWN AT SECTOR "
+            f"{sector} DUE TO BAD NAVIGATION"
+        )
+        return True
+    
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
         assert cd < len(dirs) - 1
@@ -892,15 +903,7 @@ class Game:
                 self.new_quadrant()
                 return
             ship_sector = self.world.ship.position.sector
-            ship_x = int(ship_sector.x)
-            ship_y = int(ship_sector.y)
-            if self.world.quadrant.data[ship_x][ship_y] != Entity.void:
-                ship_sector.x = int(ship_sector.x - dx)
-                ship_sector.y = int(ship_sector.y - dy)
-                print(
-                    "WARP ENGINES SHUT DOWN AT SECTOR "
-                    f"{ship_sector} DUE TO BAD NAVIGATION"
-                )
+            if self.move_ship_shut_down_sector_bad_navigation(ship_sector, self.world.quadrant.data[int(ship_sector.x)][int(ship_sector.y)], dx, dy):
                 break
         else:
             ship.position.sector.x, ship.position.sector.y = int(
