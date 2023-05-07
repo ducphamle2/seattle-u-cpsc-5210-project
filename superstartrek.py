@@ -695,6 +695,21 @@ class Game:
             )
             print("                         PRESENTLY DEPLOYED TO SHIELDS.")
         return warp_rounds, False
+    
+    def navigation_klingon_ship_move(self, quadrant: Quadrant, klingon_ships: List[KlingonShip]):
+        # klingons move and fire
+        for klingon_ship in klingon_ships:
+            if klingon_ship.shield != 0:
+                quadrant.set_value(
+                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.void
+                )
+                (
+                    klingon_ship.sector.x,
+                    klingon_ship.sector.y,
+                ) = quadrant.find_empty_place()
+                quadrant.set_value(
+                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.klingon
+                )
 
     def navigation(self) -> None:
         """
@@ -718,22 +733,11 @@ class Game:
         if is_warp_rounds_valid is False:
             return
         
-        # klingons move and fire
-        for klingon_ship in self.world.quadrant.klingon_ships:
-            if klingon_ship.shield != 0:
-                world.quadrant.set_value(
-                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.void
-                )
-                (
-                    klingon_ship.sector.x,
-                    klingon_ship.sector.y,
-                ) = world.quadrant.find_empty_place()
-                world.quadrant.set_value(
-                    klingon_ship.sector.x, klingon_ship.sector.y, Entity.klingon
-                )
+        # klingons move
+        self.navigation_klingon_ship_move(world.quadrant, self.world.quadrant.klingon_ships)
 
+        # klingons fire
         self.klingons_fire()
-
         # repair damaged devices and print damage report
         line = ""
         for i in range(8):
