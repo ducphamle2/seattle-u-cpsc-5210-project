@@ -658,6 +658,44 @@ class Game:
             self.world.charted_galaxy_map,
         )
 
+    def process_course_data_navigation(self, dirs_len: int):
+        cd = get_user_float("COURSE (1-9)? ") - 1  # Convert to 0-8
+        if cd == dirs_len - 1:
+            cd = 0
+        if cd < 0 or cd >= dirs_len:
+            print("   LT. SULU REPORTS, 'INCORRECT COURSE DATA, SIR!'")
+            return 0, False
+        return cd, True
+    
+    def process_wrap_navigation(self, damage_stat: float):
+        warp = get_user_float(
+            f"WARP FACTOR (0-{'0.2' if damage_stat < 0 else '8'})? "
+        )
+        if damage_stat < 0 and warp > 0.2:
+            print("WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2")
+            return warp, False
+        if warp == 0:
+            return warp, False
+        if warp < 0 or warp > 8:
+            print(
+                f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP {warp}!'"
+            )
+            return warp, False
+        return warp, True
+    
+    def process_warp_rounds_navigation(self, warp: float, ship_shields: int, ship_energy: int, damage_stat: float):
+        warp_rounds = round(warp * 8)
+        if ship_energy >= warp_rounds:
+            return warp_rounds, True
+        print("ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE")
+        print(f"                       FOR MANEUVERING AT WARP {warp}!'")
+        if ship_shields >= warp_rounds - ship_energy and damage_stat >= 0:
+            print(
+                f"DEFLECTOR CONTROL ROOM ACKNOWLEDGES {ship_shields} UNITS OF ENERGY"
+            )
+            print("                         PRESENTLY DEPLOYED TO SHIELDS.")
+        return warp_rounds, False
+
     def navigation(self) -> None:
         """
         Take navigation input and move the Enterprise.
@@ -666,39 +704,20 @@ class Game:
         """
         world = self.world
         ship = world.ship
+        
 
-        cd = get_user_float("COURSE (1-9)? ") - 1  # Convert to 0-8
-        if cd == len(dirs) - 1:
-            cd = 0
-        if cd < 0 or cd >= len(dirs):
-            print("   LT. SULU REPORTS, 'INCORRECT COURSE DATA, SIR!'")
+        cd, is_course_data_valid = self.process_course_data_navigation(len(dirs))
+        if is_course_data_valid is False:
             return
-
-        warp = get_user_float(
-            f"WARP FACTOR (0-{'0.2' if ship.damage_stats[0] < 0 else '8'})? "
-        )
-        if ship.damage_stats[0] < 0 and warp > 0.2:
-            print("WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2")
-            return
-        if warp == 0:
-            return
-        if warp < 0 or warp > 8:
-            print(
-                f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP {warp}!'"
-            )
+        
+        warp, is_warp_valid = self.process_wrap_navigation(ship.damage_stats[0])
+        if is_warp_valid is False:
             return
 
-        warp_rounds = round(warp * 8)
-        if ship.energy < warp_rounds:
-            print("ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE")
-            print(f"                       FOR MANEUVERING AT WARP {warp}!'")
-            if ship.shields >= warp_rounds - ship.energy and ship.damage_stats[6] >= 0:
-                print(
-                    f"DEFLECTOR CONTROL ROOM ACKNOWLEDGES {ship.shields} UNITS OF ENERGY"
-                )
-                print("                         PRESENTLY DEPLOYED TO SHIELDS.")
+        warp_rounds, is_warp_rounds_valid = self.process_warp_rounds_navigation(warp, ship.shields, ship.energy, ship.damage_stats[6])
+        if is_warp_rounds_valid is False:
             return
-
+        
         # klingons move and fire
         for klingon_ship in self.world.quadrant.klingon_ships:
             if klingon_ship.shield != 0:
