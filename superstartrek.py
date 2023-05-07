@@ -664,7 +664,7 @@ class Game:
             cd = 0
         if cd < 0 or cd >= dirs_len:
             print("   LT. SULU REPORTS, 'INCORRECT COURSE DATA, SIR!'")
-            return 0, False
+            return cd, False
         return cd, True
     
     def process_wrap_navigation(self, damage_stat: float):
