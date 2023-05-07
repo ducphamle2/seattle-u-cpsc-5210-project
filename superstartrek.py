@@ -837,6 +837,9 @@ class Game:
         cdi = int(cd)
         return dirs[cdi][0] + (dirs[cdi + 1][dirs_index] - dirs[cdi][dirs_index]) * (cd - cdi)
     
+    def move_ship_increment_sector(self, quadrant_direction: int, warp_rounds: float, direction: float):
+        return quadrant_direction * 8 + warp_rounds * direction
+    
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
         assert cd < len(dirs) - 1
@@ -865,8 +868,8 @@ class Game:
                 or ship.position.sector.y > 7
             ):
                 # exceeded quadrant limits; calculate final position
-                sector_start_x += ship.position.quadrant.x * 8 + warp_rounds * dx
-                sector_start_y += ship.position.quadrant.y * 8 + warp_rounds * dy
+                sector_start_x += self.move_ship_increment_sector(ship.position.quadrant.x, warp_rounds, dx)
+                sector_start_y += self.move_ship_increment_sector(ship.position.quadrant.y, warp_rounds, dy)
                 self.move_ship_calculate_ship_position_quadrant_limits(ship.position.quadrant, ship.position.sector, sector_start_x, sector_start_y)
 
                 hit_edge = self.move_ship_verify_hit_edge_calculating_final_position(ship.position.quadrant, ship.position.sector)
