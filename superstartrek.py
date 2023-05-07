@@ -824,6 +824,15 @@ class Game:
             quadrant.y -= 1
             sector.y = 7
 
+    def move_ship_is_stay_in_quadrant(self, quadrant: Point, start_quadrant: Point):
+        stayed_in_quadrant = (
+            quadrant.x == start_quadrant.x
+            and quadrant.y == start_quadrant.y
+        )
+        if stayed_in_quadrant:
+            return True
+        return False
+    
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
         assert cd < len(dirs) - 1
@@ -871,11 +880,7 @@ class Game:
                     if self.navigation_check_world_has_ended(world):
                         return
 
-                stayed_in_quadrant = (
-                    ship.position.quadrant.x == start_quadrant.x
-                    and ship.position.quadrant.y == start_quadrant.y
-                )
-                if stayed_in_quadrant:
+                if self.move_ship_is_stay_in_quadrant(ship.position.quadrant, start_quadrant):
                     break
                 world.stardate += 1
                 ship.maneuver_energy(warp_rounds)
