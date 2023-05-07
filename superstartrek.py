@@ -926,6 +926,20 @@ class Game:
             )
         print()
 
+    def damage_control_calculate_damage_sum(self, damage_stats: List[float], delay_in_repairs_at_base: float):
+        damage_sum = sum(0.1 for i in range(8) if damage_stats[i] < 0)
+        if damage_sum == 0:
+            return damage_sum, False
+
+        damage_sum += delay_in_repairs_at_base
+        if damage_sum >= 1:
+            damage_sum = 0.9
+        print("\nTECHNICIANS STANDING BY TO EFFECT REPAIRS TO YOUR SHIP;")
+        print(
+            f"ESTIMATED TIME TO REPAIR: {round(0.01 * int(100 * damage_sum), 2)} STARDATES"
+        )
+        return damage_sum, True
+    
     def damage_control(self) -> None:
         """Print a damage control report."""
         ship = self.world.ship
@@ -933,18 +947,11 @@ class Game:
 
         if not ship.docked:
             return
-
-        damage_sum = sum(0.1 for i in range(8) if ship.damage_stats[i] < 0)
-        if damage_sum == 0:
+        
+        damage_sum, need_to_repair_ship = self.damage_control_calculate_damage_sum(ship.damage_stats, self.world.quadrant.delay_in_repairs_at_base)
+        if not need_to_repair_ship:
             return
 
-        damage_sum += self.world.quadrant.delay_in_repairs_at_base
-        if damage_sum >= 1:
-            damage_sum = 0.9
-        print("\nTECHNICIANS STANDING BY TO EFFECT REPAIRS TO YOUR SHIP;")
-        print(
-            f"ESTIMATED TIME TO REPAIR: {round(0.01 * int(100 * damage_sum), 2)} STARDATES"
-        )
         if input("WILL YOU AUTHORIZE THE REPAIR ORDER (Y/N)? ").upper().strip() != "Y":
             return
 
