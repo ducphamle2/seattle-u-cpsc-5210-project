@@ -915,19 +915,21 @@ class Game:
         )
         ship.maneuver_energy(warp_rounds)
 
+    def damage_control_process_display_damage_control_report(self, damage_stats: List[float], devices: Tuple[str]):
+        if damage_stats[5] < 0:
+            print("DAMAGE CONTROL REPORT NOT AVAILABLE")
+            return
+        print("\nDEVICE             STATE OF REPAIR")
+        for r1 in range(8):
+            print(
+                f"{devices[r1].ljust(26, ' ')}{int(damage_stats[r1] * 100) * 0.01:g}"
+            )
+        print()
+
     def damage_control(self) -> None:
         """Print a damage control report."""
         ship = self.world.ship
-
-        if ship.damage_stats[5] < 0:
-            print("DAMAGE CONTROL REPORT NOT AVAILABLE")
-        else:
-            print("\nDEVICE             STATE OF REPAIR")
-            for r1 in range(8):
-                print(
-                    f"{ship.devices[r1].ljust(26, ' ')}{int(ship.damage_stats[r1] * 100) * 0.01:g}"
-                )
-            print()
+        self.damage_control_process_display_damage_control_report(ship.damage_stats, ship.devices)
 
         if not ship.docked:
             return
