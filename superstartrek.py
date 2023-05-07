@@ -720,6 +720,22 @@ class Game:
         if warp < 1:
             return stardate + 0.1 * int(10 * warp)
         return stardate + 1
+    
+    def navigation_repair_damage_devices(self, warp: float, damage_stats: List[float], devices: List[str]):
+        line = ""
+        for i in range(8):
+            if damage_stats[i] >= 0:
+                continue
+            damage_stats[i] += min(warp, 1)
+            if damage_stats[i] <= -0.1:
+                continue
+            if damage_stats[i] < 0:
+                damage_stats[i] = -0.1
+                continue
+            if len(line) == 0:
+                line = "DAMAGE CONTROL REPORT:"
+            line += f"   {devices[i]} REPAIR COMPLETED\n"
+        return line
 
 
     def navigation(self) -> None:
@@ -750,16 +766,7 @@ class Game:
         # klingons fire
         self.klingons_fire()
         # repair damaged devices and print damage report
-        line = ""
-        for i in range(8):
-            if ship.damage_stats[i] < 0:
-                ship.damage_stats[i] += min(warp, 1)
-                if -0.1 < ship.damage_stats[i] < 0:
-                    ship.damage_stats[i] = -0.1
-                elif ship.damage_stats[i] >= 0:
-                    if len(line) == 0:
-                        line = "DAMAGE CONTROL REPORT:"
-                    line += f"   {ship.devices[i]} REPAIR COMPLETED\n"
+        line = self.navigation_repair_damage_devices(warp, ship.damage_stats, ship.devices)
         if len(line) > 0:
             print(line)
         if random.random() <= 0.2:
