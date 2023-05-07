@@ -833,6 +833,10 @@ class Game:
             return True
         return False
     
+    def move_ship_calculate_direction(self, dirs: list[list[int]], cd: float, dirs_index: int):
+        cdi = int(cd)
+        return dirs[cdi][0] + (dirs[cdi + 1][dirs_index] - dirs[cdi][dirs_index]) * (cd - cdi)
+    
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
         assert cd < len(dirs) - 1
@@ -842,11 +846,9 @@ class Game:
         world.quadrant.set_value(
             int(ship.position.sector.x), int(ship.position.sector.y), Entity.void
         )
-        cdi = int(cd)
-
         # Interpolate direction:
-        dx = dirs[cdi][0] + (dirs[cdi + 1][0] - dirs[cdi][0]) * (cd - cdi)
-        dy = dirs[cdi][1] + (dirs[cdi + 1][1] - dirs[cdi][1]) * (cd - cdi)
+        dx = self.move_ship_calculate_direction(dirs, cd, 0)
+        dy = self.move_ship_calculate_direction(dirs, cd, 1)
 
         start_quadrant = Point(ship.position.quadrant.x, ship.position.quadrant.y)
         sector_start_x: float = ship.position.sector.x
