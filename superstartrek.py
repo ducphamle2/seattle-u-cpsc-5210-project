@@ -792,7 +792,7 @@ class Game:
             return
         self.short_range_scan()
 
-    def move_ship_verify_hit_edge(self, quadrant: Point, sector: Point):
+    def move_ship_verify_hit_edge_calculating_final_position(self, quadrant: Point, sector: Point):
         hit_edge = False
         if quadrant.x < 0:
             hit_edge = True
@@ -806,7 +806,23 @@ class Game:
         if quadrant.y > 7:
             hit_edge = True
             quadrant.y = sector.y = 7
-        return hit_edge, quadrant, sector
+        return hit_edge
+    
+    def move_ship_calculate_ship_position_quadrant_limits(self, quadrant: Point, sector: Point, sector_start_x: float, sector_start_y: float):
+        quadrant.x = int(sector_start_x / 8)
+        quadrant.y = int(sector_start_y / 8)
+        sector.x = int(
+            sector_start_x - quadrant.x * 8
+        )
+        sector.y = int(
+            sector_start_y - quadrant.y * 8
+        )
+        if sector.x < 0:
+            quadrant.x -= 1
+            sector.x = 7
+        if sector.y < 0:
+            quadrant.y -= 1
+            sector.y = 7
 
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
@@ -840,25 +856,9 @@ class Game:
                 # exceeded quadrant limits; calculate final position
                 sector_start_x += ship.position.quadrant.x * 8 + warp_rounds * dx
                 sector_start_y += ship.position.quadrant.y * 8 + warp_rounds * dy
-                ship.position.quadrant.x = int(sector_start_x / 8)
-                ship.position.quadrant.y = int(sector_start_y / 8)
-                ship.position.sector.x = int(
-                    sector_start_x - ship.position.quadrant.x * 8
-                )
-                ship.position.sector.y = int(
-                    sector_start_y - ship.position.quadrant.y * 8
-                )
-                if ship.position.sector.x < 0:
-                    ship.position.quadrant.x -= 1
-                    ship.position.sector.x = 7
-                if ship.position.sector.y < 0:
-                    ship.position.quadrant.y -= 1
-                    ship.position.sector.y = 7
+                self.move_ship_calculate_ship_position_quadrant_limits(ship.position.quadrant, ship.position.sector, sector_start_x, sector_start_y)
 
-                hit_edge, new_quadrant, new_sector = self.move_ship_verify_hit_edge(ship.position.quadrant, ship.position.sector)
-                ship.position.quadrant = new_quadrant
-                ship.position.sector = new_sector
-
+                hit_edge = self.move_ship_verify_hit_edge_calculating_final_position(ship.position.quadrant, ship.position.sector)
                 if hit_edge:
                     print("LT. UHURA REPORTS MESSAGE FROM STARFLEET COMMAND:")
                     print("  'PERMISSION TO ATTEMPT CROSSING OF GALACTIC PERIMETER")
