@@ -792,6 +792,22 @@ class Game:
             return
         self.short_range_scan()
 
+    def move_ship_verify_hit_edge(self, quadrant: Point, sector: Point):
+        hit_edge = False
+        if quadrant.x < 0:
+            hit_edge = True
+            quadrant.x = sector.x = 0
+        if quadrant.x > 7:
+            hit_edge = True
+            quadrant.x = sector.x = 7
+        if quadrant.y < 0:
+            hit_edge = True
+            quadrant.y = sector.y = 0
+        if quadrant.y > 7:
+            hit_edge = True
+            quadrant.y = sector.y = 7
+        return hit_edge, quadrant, sector
+
     def move_ship(self, warp_rounds: int, cd: float) -> None:
         assert cd >= 0
         assert cd < len(dirs) - 1
@@ -839,19 +855,10 @@ class Game:
                     ship.position.quadrant.y -= 1
                     ship.position.sector.y = 7
 
-                hit_edge = False
-                if ship.position.quadrant.x < 0:
-                    hit_edge = True
-                    ship.position.quadrant.x = ship.position.sector.x = 0
-                if ship.position.quadrant.x > 7:
-                    hit_edge = True
-                    ship.position.quadrant.x = ship.position.sector.x = 7
-                if ship.position.quadrant.y < 0:
-                    hit_edge = True
-                    ship.position.quadrant.y = ship.position.sector.y = 0
-                if ship.position.quadrant.y > 7:
-                    hit_edge = True
-                    ship.position.quadrant.y = ship.position.sector.y = 7
+                hit_edge, new_quadrant, new_sector = self.move_ship_verify_hit_edge(ship.position.quadrant, ship.position.sector)
+                ship.position.quadrant = new_quadrant
+                ship.position.sector = new_sector
+
                 if hit_edge:
                     print("LT. UHURA REPORTS MESSAGE FROM STARFLEET COMMAND:")
                     print("  'PERMISSION TO ATTEMPT CROSSING OF GALACTIC PERIMETER")
