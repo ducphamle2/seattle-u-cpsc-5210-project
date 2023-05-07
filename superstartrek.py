@@ -736,7 +736,21 @@ class Game:
                 line = "DAMAGE CONTROL REPORT:"
             line += f"   {devices[i]} REPAIR COMPLETED\n"
         return line
-
+    
+    def navigation_print_damage_report(self, damage_stats: List[float], devices: List[str]):
+        if random.random() > 0.2:
+            return
+        device = fnr()
+        if random.random() < 0.6:
+            damage_stats[device] -= random.random() * 5 + 1
+            print(f"DAMAGE CONTROL REPORT:   {devices[device]} DAMAGED\n")
+            return
+        
+        damage_stats[device] += random.random() * 3 + 1
+        print(
+            f"DAMAGE CONTROL REPORT:   {devices[device]} STATE OF REPAIR IMPROVED\n"
+        )
+        return
 
     def navigation(self) -> None:
         """
@@ -765,20 +779,12 @@ class Game:
 
         # klingons fire
         self.klingons_fire()
-        # repair damaged devices and print damage report
+        # repair damaged devices
         line = self.navigation_repair_damage_devices(warp, ship.damage_stats, ship.devices)
         if len(line) > 0:
             print(line)
-        if random.random() <= 0.2:
-            device = fnr()
-            if random.random() < 0.6:
-                ship.damage_stats[device] -= random.random() * 5 + 1
-                print(f"DAMAGE CONTROL REPORT:   {ship.devices[device]} DAMAGED\n")
-            else:
-                ship.damage_stats[device] += random.random() * 3 + 1
-                print(
-                    f"DAMAGE CONTROL REPORT:   {ship.devices[device]} STATE OF REPAIR IMPROVED\n"
-                )
+        # print damage report
+        self.navigation_print_damage_report(ship.damage_stats, ship.devices)
 
         self.move_ship(warp_rounds, cd)
         world.stardate = self.navigation_calculate_world_stardate(warp, world.stardate)
