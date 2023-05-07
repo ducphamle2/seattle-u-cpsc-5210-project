@@ -658,7 +658,7 @@ class Game:
             self.world.charted_galaxy_map,
         )
 
-    def process_course_data_navigation(self, dirs_len: int):
+    def navigation_process_course_data(self, dirs_len: int):
         cd = get_user_float("COURSE (1-9)? ") - 1  # Convert to 0-8
         if cd == dirs_len - 1:
             cd = 0
@@ -667,7 +667,7 @@ class Game:
             return cd, False
         return cd, True
     
-    def process_wrap_navigation(self, damage_stat: float):
+    def navigation_process_warp(self, damage_stat: float):
         warp = get_user_float(
             f"WARP FACTOR (0-{'0.2' if damage_stat < 0 else '8'})? "
         )
@@ -683,7 +683,7 @@ class Game:
             return warp, False
         return warp, True
     
-    def process_warp_rounds_navigation(self, warp: float, ship_shields: int, ship_energy: int, damage_stat: float):
+    def navigation_process_warp_rounds(self, warp: float, ship_shields: int, ship_energy: int, damage_stat: float):
         warp_rounds = round(warp * 8)
         if ship_energy >= warp_rounds:
             return warp_rounds, True
@@ -706,15 +706,15 @@ class Game:
         ship = world.ship
         
 
-        cd, is_course_data_valid = self.process_course_data_navigation(len(dirs))
+        cd, is_course_data_valid = self.navigation_process_course_data(len(dirs))
         if is_course_data_valid is False:
             return
         
-        warp, is_warp_valid = self.process_wrap_navigation(ship.damage_stats[0])
+        warp, is_warp_valid = self.navigation_process_warp(ship.damage_stats[0])
         if is_warp_valid is False:
             return
 
-        warp_rounds, is_warp_rounds_valid = self.process_warp_rounds_navigation(warp, ship.shields, ship.energy, ship.damage_stats[6])
+        warp_rounds, is_warp_rounds_valid = self.navigation_process_warp_rounds(warp, ship.shields, ship.energy, ship.damage_stats[6])
         if is_warp_rounds_valid is False:
             return
         
