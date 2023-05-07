@@ -710,6 +710,11 @@ class Game:
                 quadrant.set_value(
                     klingon_ship.sector.x, klingon_ship.sector.y, Entity.klingon
                 )
+    def navigation_check_world_has_ended(self, world: World):
+        if world.has_mission_ended():
+            self.end_game(won=False, quit=False)
+            return True
+        return False
 
     def navigation(self) -> None:
         """
@@ -764,10 +769,8 @@ class Game:
 
         self.move_ship(warp_rounds, cd)
         world.stardate += 0.1 * int(10 * warp) if warp < 1 else 1
-        if world.has_mission_ended():
-            self.end_game(won=False, quit=False)
+        if self.navigation_check_world_has_ended(world):
             return
-
         self.short_range_scan()
 
     def move_ship(self, warp_rounds: int, cd: float) -> None:
@@ -839,8 +842,7 @@ class Game:
                         f"  AT SECTOR {ship.position.sector} OF "
                         f"QUADRANT {ship.position.quadrant}.'"
                     )
-                    if world.has_mission_ended():
-                        self.end_game(won=False, quit=False)
+                    if self.navigation_check_world_has_ended(world):
                         return
 
                 stayed_in_quadrant = (
