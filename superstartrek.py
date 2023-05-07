@@ -715,6 +715,12 @@ class Game:
             self.end_game(won=False, quit=False)
             return True
         return False
+    
+    def navigation_calculate_world_stardate(self, warp: float, stardate: float):
+        if warp < 1:
+            return stardate + 0.1 * int(10 * warp)
+        return stardate + 1
+
 
     def navigation(self) -> None:
         """
@@ -768,7 +774,7 @@ class Game:
                 )
 
         self.move_ship(warp_rounds, cd)
-        world.stardate += 0.1 * int(10 * warp) if warp < 1 else 1
+        world.stardate = self.navigation_calculate_world_stardate(warp, world.stardate)
         if self.navigation_check_world_has_ended(world):
             return
         self.short_range_scan()
