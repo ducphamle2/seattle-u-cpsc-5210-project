@@ -178,12 +178,29 @@ class TestingGame(TestCase):
         ("dirs_len_equal_to_course_data", 2, 3, 2, False),
         ("course_data_smaller_than_zero", 2, -1, -2, False)
     ])
-    def test_navigation_process_course_data(self, __name__, dirs_len: int, user_input: int, expected_cd: int, expected_course_data: bool):
+    def test_navigation_process_course_data(self, __name__, dirs_len: int, user_input: int, expected_cd: int, expected_is_valid_course_data: bool):
         game = Game()
         with patch('builtins.input', return_value=user_input):
             cd, is_course_data_valid = game.navigation_process_course_data(dirs_len)
         self.assertEqual(cd, expected_cd)
-        self.assertEqual(is_course_data_valid, expected_course_data)
+        self.assertEqual(is_course_data_valid, expected_is_valid_course_data)
+
+    @parameterized.expand([
+        ("damage_stat_smaller_than_zero_warp_greater_than_0.2", 0.3, -0.1, "WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2\n", False),
+        ("warp_is_zero", 0, -1, "", False),
+        ("warp_smaller_than_zero", -0.1, -1, f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP -0.1!'\n", False),
+        ("damage_stats_greater_than_zero_warp_greater_than_eight", 8.1, 1, f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP 8.1!'\n", False),
+        ("damage_stats_greater_than_zero_warp_is_0.2", 0.2, 1, "", True),
+        ("damage_stats_equal_zero_warp_is_8", 8, 0, "", True),
+    ])
+    def test_navigation_process_warp(self, __name__, warp_input: float, damage_stat: float, expected_print: str, expected_is_warp_valid: bool):
+        game = Game()
+        with patch('builtins.input', return_value=warp_input):
+            captured_output = StringIO()                  # Create StringIO object
+            sys.stdout = captured_output                     #  and redirect stdout.
+            _, is_warp_valid = game.navigation_process_warp(damage_stat)
+            self.assertEqual(is_warp_valid, expected_is_warp_valid)
+            self.assertEqual(captured_output.getvalue(), expected_print)
 
 
 if __name__ == '__main__':
