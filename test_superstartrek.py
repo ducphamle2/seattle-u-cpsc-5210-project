@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import sys 
 from unittest.mock import patch
 from parameterized import parameterized
-from superstartrek import Ship
+from superstartrek import Ship, Game
 from io import StringIO
 
 class TestingShip(TestCase):
@@ -169,6 +169,22 @@ class TestingShip(TestCase):
         self.assertEqual(captured_output.getvalue(), "SHIELD CONTROL REPORTS  'THIS IS NOT THE FEDERATION "
                 "TREASURY.'\n"
                 "<SHIELDS UNCHANGED>\n")   
+        
+class TestingGame(TestCase):
+
+    @parameterized.expand([
+        ("dirs_len_minus_one_equal_course_data", 3, 3, 0, True),
+        ("dirs_len_smaller_than_course_data", 1, 3, 2, False),
+        ("dirs_len_equal_to_course_data", 2, 3, 2, False),
+        ("course_data_smaller_than_zero", 2, -1, -2, False)
+    ])
+    def test_navigation_process_course_data(self, __name__, dirs_len: int, user_input: int, expected_cd: int, expected_course_data: bool):
+        game = Game()
+        with patch('builtins.input', return_value=user_input):
+            cd, is_course_data_valid = game.navigation_process_course_data(dirs_len)
+        self.assertEqual(cd, expected_cd)
+        self.assertEqual(is_course_data_valid, expected_course_data)
+
 
 if __name__ == '__main__':
     unittest.main()
