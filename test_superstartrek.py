@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import sys 
 from unittest.mock import patch
 from parameterized import parameterized
-from superstartrek import Ship, Game
+from superstartrek import Ship, Game, World
 from io import StringIO
 
 class TestingShip(TestCase):
@@ -186,10 +186,10 @@ class TestingGame(TestCase):
         self.assertEqual(is_course_data_valid, expected_is_valid_course_data)
 
     @parameterized.expand([
-        ("damage_stat_smaller_than_zero_warp_greater_than_0.2", 0.3, -0.1, "WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2\n", False),
+        ("damage_stat_smaller_than_zero_warp_greater_than_0.2", 0.3, -0.01, "WARP ENGINES ARE DAMAGED. MAXIMUM SPEED = WARP 0.2\n", False),
         ("warp_is_zero", 0, -1, "", False),
-        ("warp_smaller_than_zero", -0.1, -1, f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP -0.1!'\n", False),
-        ("damage_stats_greater_than_zero_warp_greater_than_eight", 8.1, 1, f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP 8.1!'\n", False),
+        ("warp_smaller_than_zero", -0.01, -1, f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP -0.01!'\n", False),
+        ("damage_stats_greater_than_zero_warp_greater_than_eight", 8.01, 1, f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP 8.01!'\n", False),
         ("damage_stats_greater_than_zero_warp_is_0.2", 0.2, 1, "", True),
         ("damage_stats_equal_zero_warp_is_8", 8, 0, "", True),
     ])
@@ -198,9 +198,40 @@ class TestingGame(TestCase):
         with patch('builtins.input', return_value=warp_input):
             captured_output = StringIO()                  # Create StringIO object
             sys.stdout = captured_output                     #  and redirect stdout.
-            _, is_warp_valid = game.navigation_process_warp(damage_stat)
+            warp, is_warp_valid = game.navigation_process_warp(damage_stat)
             self.assertEqual(is_warp_valid, expected_is_warp_valid)
+            self.assertEqual(warp, warp_input)
             self.assertEqual(captured_output.getvalue(), expected_print)
+
+    @parameterized.expand([
+        ("ship_energy_greater_than_warp_rounds", 1, 1, 9, 1, "", True),
+        ("ship_energy_equal_warp_rounds", 1, 1, 8, 1, "", True),
+        ("ship_energy_smaller_than_warp_rounds_ship_shields_smaller_than_warp_rounds_minus_energy", 1, 0, 7, 1, "ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE\n                       FOR MANEUVERING AT WARP 1!'\n", False),
+        ("ship_energy_smaller_than_warp_rounds_damage_stat_smaller_than_0", 2, 1, 1, -0.01, "ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE\n                       FOR MANEUVERING AT WARP 2!'\n", False),
+        ("ship_energy_smaller_than_warp_rounds_ship_shield_equal_wrap_round_minus_energy_damage_stat_equal_0", 0, 1, -1, 0, "ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE\n                       FOR MANEUVERING AT WARP 0!'\nDEFLECTOR CONTROL ROOM ACKNOWLEDGES 1 UNITS OF ENERGY\n                         PRESENTLY DEPLOYED TO SHIELDS.\n", False),
+        ("ship_energy_smaller_than_warp_rounds_ship_shield_greater_than_wrap_round_minus_energy_damage_stat_greater_than_0", 0, 2, -1, 0.01, "ENGINEERING REPORTS   'INSUFFICIENT ENERGY AVAILABLE\n                       FOR MANEUVERING AT WARP 0!'\nDEFLECTOR CONTROL ROOM ACKNOWLEDGES 2 UNITS OF ENERGY\n                         PRESENTLY DEPLOYED TO SHIELDS.\n", False),
+    ])
+    def test_navigation_process_warp_rounds(self, __name__, warp: int, ship_shields: int, ship_energy: int, damage_stat: float, expected_print: str, expected_is_warp_rounds_valid: bool):
+        game = Game()
+        captured_output = StringIO()                  # Create StringIO object
+        sys.stdout = captured_output                     #  and redirect stdout.
+        warp_rounds, is_warp_rounds_valid = game.navigation_process_warp_rounds(warp, ship_shields, ship_energy, damage_stat)
+        self.assertEqual(is_warp_rounds_valid, expected_is_warp_rounds_valid)
+        self.assertEqual(warp_rounds, round(warp * 8))
+        self.assertEqual(captured_output.getvalue(), expected_print)
+
+    @parameterized.expand([
+        ("world has ended", True, True),
+        ("world has not ended", False, False)
+    ])
+    def test_navigation_check_world_has_ended(self, __name__, has_mission_ended: bool, expected_check_world_has_ended: bool):
+        game = Game()
+        world = World()
+        # mocking methods that we do not care
+        world.has_mission_ended = lambda : has_mission_ended
+        game.end_game = lambda won, quit : None
+        world_has_ended = game.navigation_check_world_has_ended(world)
+        self.assertEqual(world_has_ended, expected_check_world_has_ended)
 
 
 if __name__ == '__main__':
