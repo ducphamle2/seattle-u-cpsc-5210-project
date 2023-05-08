@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import sys 
 from unittest.mock import patch
 from parameterized import parameterized
-from superstartrek import Ship, Game
+from superstartrek import Ship, Game, World
 from io import StringIO
 
 class TestingShip(TestCase):
@@ -219,6 +219,19 @@ class TestingGame(TestCase):
         self.assertEqual(is_warp_rounds_valid, expected_is_warp_rounds_valid)
         self.assertEqual(warp_rounds, round(warp * 8))
         self.assertEqual(captured_output.getvalue(), expected_print)
+
+    @parameterized.expand([
+        ("world has ended", True, True),
+        ("world has not ended", False, False)
+    ])
+    def test_navigation_check_world_has_ended(self, __name__, has_mission_ended: bool, expected_check_world_has_ended: bool):
+        game = Game()
+        world = World()
+        # mocking methods that we do not care
+        world.has_mission_ended = lambda : has_mission_ended
+        game.end_game = lambda won, quit : None
+        world_has_ended = game.navigation_check_world_has_ended(world)
+        self.assertEqual(world_has_ended, expected_check_world_has_ended)
 
 
 if __name__ == '__main__':
