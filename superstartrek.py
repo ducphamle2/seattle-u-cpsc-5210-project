@@ -410,25 +410,27 @@ class Game:
                     f"DAMAGE CONTROL REPORTS  '{ship.devices[device]} DAMAGED BY THE HIT'"
                 )
 
-    def phaser_control(self) -> None:
-        """Take phaser control input and fire phasers."""
-        world = self.world
-        klingon_ships = world.quadrant.klingon_ships
-        ship = world.ship
-
+    def check_phasers_operational(self, ship):
+        """Check if phasers are operational."""
         if ship.damage_stats[3] < 0:
             print("PHASERS INOPERATIVE")
-            return
+            return False
+        return True
 
-        if self.world.quadrant.nb_klingons <= 0:
+    def check_no_klingons(self, world):
+        """Check if there are no klingons in the quadrant."""
+        if world.quadrant.nb_klingons <= 0:
             print("SCIENCE OFFICER SPOCK REPORTS  'SENSORS SHOW NO ENEMY SHIPS")
             print("                                IN THIS QUADRANT'")
-            return
+            return True
+        return False  
 
+    def check_computer_accuracy(self, ship):
+        """Check if the computer is hampering accuracy."""
         if ship.damage_stats[7] < 0:
             print("COMPUTER FAILURE HAMPERS ACCURACY")
 
-        print(f"PHASERS LOCKED ON TARGET;  ENERGY AVAILABLE = {ship.energy} UNITS")
+    def get_phaser_firepower(ship):
         phaser_firepower: float = 0
         while True:
             while True:
@@ -440,18 +442,32 @@ class Game:
                 return
             if ship.energy >= phaser_firepower:
                 break
-            print(f"ENERGY AVAILABLE = {ship.energy} UNITS")
+        return phaser_firepower
 
-        ship.energy -= phaser_firepower
+    def adjust_ship_energy(self, ship, firepower):
+        ship.energy -= firepower
+
+    def adjust_phaser_firepower(self, ship, phaser_firepower):
+        """Adjust phaser firepower based on computer accuracy."""
         if ship.damage_stats[7] < 0:  # bug in original, was d[6]
             phaser_firepower *= random.random()
+        return phaser_firepower
 
-        phaser_per_klingon = int(phaser_firepower / self.world.quadrant.nb_klingons)
+    def get_phaser_per_klingon(self, world, phaser_firepower):
+        """Get phaser energy per klingon."""
+        phaser_per_klingon = int(phaser_firepower / world.quadrant.nb_klingons)
+        return phaser_per_klingon 
+
+    def get_h(self, phaser_energy, i):
+        return int((phaser_energy / self.fnd(i)) * (random.random() + 2))
+
+    def fire_phasers_on_klingon(self, world, ship, klingon_ships, phaser_energy):
+        """Fire phasers on a klingon ship."""
         for i, klingon_ship in enumerate(klingon_ships):
             if klingon_ship.shield <= 0:
                 continue
 
-            h = int((phaser_per_klingon / self.fnd(i)) * (random.random() + 2))
+            h = self.get_h(phaser_energy, i)
             if h <= 0.15 * klingon_ship.shield:
                 print(f"SENSORS SHOW NO DAMAGE TO ENEMY AT {klingon_ship.sector}")
             else:
@@ -459,7 +475,7 @@ class Game:
                 print(f" {h} UNIT HIT ON KLINGON AT SECTOR {klingon_ship.sector}")
                 if klingon_ship.shield <= 0:
                     print("*** KLINGON DESTROYED ***")
-                    self.world.quadrant.nb_klingons -= 1
+                    world.quadrant.nb_klingons -= 1
                     world.remaining_klingons -= 1
                     world.quadrant.set_value(
                         klingon_ship.sector.x, klingon_ship.sector.y, Entity.void
@@ -479,7 +495,34 @@ class Game:
                 else:
                     print(
                         f"   (SENSORS SHOW {round(klingon_ship.shield,6)} UNITS REMAINING)"
-                    )
+                    )  
+
+    def phaser_control(self) -> None:
+        """Take phaser control input and fire phasers."""
+        world = self.world
+        klingon_ships = world.quadrant.klingon_ships
+        ship = world.ship
+
+        if not self.check_phasers_operational(ship):
+            return
+
+        if self.check_no_klingons(world):
+            return
+
+        self.check_computer_accuracy(ship)
+
+        print(f"PHASERS LOCKED ON TARGET;  ENERGY AVAILABLE = {ship.energy} UNITS")
+
+        phaser_firepower = self.get_phaser_firepower(ship)
+
+        self.adjust_ship_energy(ship, phaser_firepower)
+
+        phaser_firepower = self.adjust_phaser_firepower(ship, phaser_firepower)
+
+        phaser_per_klingon = self.get_phaser_per_klingon(world, phaser_firepower)
+
+        for i, klingon_ship in enumerate(klingon_ships):
+            self.fire_phasers_on_klingon(ship, klingon_ship, phaser_per_klingon)
 
         self.klingons_fire()
 
