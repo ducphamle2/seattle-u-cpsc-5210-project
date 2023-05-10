@@ -430,7 +430,7 @@ class Game:
         if ship.damage_stats[7] < 0:
             print("COMPUTER FAILURE HAMPERS ACCURACY")
 
-    def get_phaser_firepower(ship):
+    def get_phaser_firepower(self, ship):
         phaser_firepower: float = 0
         while True:
             while True:
@@ -521,10 +521,10 @@ class Game:
 
         phaser_per_klingon = self.get_phaser_per_klingon(world, phaser_firepower)
 
-        for i, klingon_ship in enumerate(klingon_ships):
-            self.fire_phasers_on_klingon(ship, klingon_ship, phaser_per_klingon)
+        self.fire_phasers_on_klingon(world, ship, klingon_ships, phaser_per_klingon)
 
         self.klingons_fire()
+
 
     def photon_torpedoes(self) -> None:
         """Take photon torpedo input and process firing of torpedoes."""
