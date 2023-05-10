@@ -410,6 +410,8 @@ class Game:
                     f"DAMAGE CONTROL REPORTS  '{ship.devices[device]} DAMAGED BY THE HIT'"
                 )
 
+################################# phaser control ################################################
+
     def check_phasers_operational(self, ship):
         """Check if phasers are operational."""
         if ship.damage_stats[3] < 0:
