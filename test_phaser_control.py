@@ -1,12 +1,9 @@
-import unittest
-import sys
-from superstartrek import World, Game, Ship, Point, Quadrant, Entity, QuadrantData, Position, KlingonShip
+from superstartrek import World, Game, Ship, Point, Quadrant, QuadrantData, Position, KlingonShip
 from unittest import TestCase
 import sys 
 from unittest.mock import patch
 from parameterized import parameterized
 from superstartrek import Ship, Game, World
-from io import StringIO
 
 class PhaserControlTest(TestCase):
 
