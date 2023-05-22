@@ -2,7 +2,6 @@ import unittest
 import sys
 from superstartrek import Point, Position, Ship
 from unittest import TestCase
-from unittest.mock import MagicMock
 import sys 
 from unittest.mock import patch
 from parameterized import parameterized

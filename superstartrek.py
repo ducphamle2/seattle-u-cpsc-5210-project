@@ -452,8 +452,11 @@ class Game:
     def adjust_phaser_firepower(self, ship, phaser_firepower):
         """Adjust phaser firepower based on computer accuracy."""
         if ship.damage_stats[7] < 0:  # bug in original, was d[6]
-            phaser_firepower *= random.random()
+            phaser_firepower *= self.get_random_multiplier()
         return phaser_firepower
+
+    def get_random_multiplier(self):
+        return random.random()
 
     def get_phaser_per_klingon(self, world, phaser_firepower):
         """Get phaser energy per klingon."""
