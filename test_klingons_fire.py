@@ -13,14 +13,16 @@ class TestKlingonsFire(TestCase):
         self.ship = Ship()  # Initialize an instance of ship
         self.world = World()  # Initialize an instance of World
 
-    def test_no_klingons_in_quadrant(self):
+    @patch.object(Game, "end_game", return_value=None)  # Mocking end_game method here
+    def test_no_klingons_in_quadrant(self, mock_end_game):
         """Test when there are no Klingons in the quadrant."""
         initial_shields = self.ship.shields
         self.world.quadrant.nb_klingons = 0
         self.game.klingons_fire()
         self.assertEqual(self.ship.shields, initial_shields)
 
-    def test_ship_docked(self):
+    @patch.object(Game, "end_game", return_value=None)  # Mocking end_game method here
+    def test_ship_docked(self, mock_end_game):
         """Test when the ship is docked."""
         self.ship.docked = True
         initial_shields = self.ship.shields
