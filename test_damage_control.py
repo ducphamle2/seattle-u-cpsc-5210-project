@@ -35,4 +35,22 @@ class TestShortRangeScan(TestCase):
         # assert
         self.assertEqual(mock_print.call_count, expected_call_count)
 
+    @parameterized.expand([
+        (0, 0, 0, False),
+        (-0.01, 0,0.1,True),
+        (-0.01, 0.99,0.9,True),
+        (-0.01, 0.98,0.9,True),
+        (-0.01, 1000,0.9,True),
+    ])
+    def test_damage_control_calculate_damage_sum(self, damage_stats: float, delay_in_repairs_at_base: float, expected_damage_sum: float, expected_is_valid: bool):
+        # setup
+        damage_stats_list = [damage_stats,0,0,0,0,0,0,0]
+        # call the method
+        damage_sum, is_valid = self.game.damage_control_calculate_damage_sum(damage_stats_list, delay_in_repairs_at_base)
+        # assert
+        self.assertEqual(damage_sum, expected_damage_sum)
+        self.assertEqual(is_valid, expected_is_valid)
+
+
+
         
