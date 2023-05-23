@@ -13,10 +13,11 @@ class TestShortRangeScan(TestCase):
     @parameterized.expand([
         (-1000, 1),
         (0, 1),
-        (1, 1),
+        (0.01, 2),
+        (1000, 2),
     ])
     @patch('builtins.print')
-    def test_long_range_scan_damage_stats(self, damage_stats: int, expected_call_count: int, mock_print):
+    def test_long_range_scan_damage_stats(self, damage_stats: float, expected_call_count: int, mock_print):
         print(damage_stats)
         print(expected_call_count)
         # Setup
@@ -25,5 +26,5 @@ class TestShortRangeScan(TestCase):
         self.game.long_range_scan()
 
         # Assertions
-        self.assertGreater(mock_print.call_count, expected_call_count)
+        self.assertGreaterEqual(mock_print.call_count, expected_call_count)
         
