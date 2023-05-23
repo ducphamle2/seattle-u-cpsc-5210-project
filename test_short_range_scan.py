@@ -1,4 +1,4 @@
-from superstartrek import World, Game
+from superstartrek import World, Game, Entity
 from unittest import TestCase
 import sys 
 from unittest.mock import patch
