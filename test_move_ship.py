@@ -30,4 +30,15 @@ class TestShortRangeScan(TestCase):
         self.assertEqual(quadrant, expected_quadrant)
         self.assertEqual(sector, expected_sector)
 
+    @parameterized.expand([
+        (Point(1, 1), Point(1,1), True),
+        (Point(1, 2), Point(1,1), False),
+        (Point(2, 1), Point(1,1), False),
+        (Point(2, 2), Point(1,1), False),
+    ])
+    def test_move_ship_is_stay_in_quadrant(self, start_quadrant: Point, quadrant: Point, expected_result: bool):
+        # Call the method
+        result = self.game.move_ship_is_stay_in_quadrant(quadrant, start_quadrant)
+        # assert
+        self.assertEqual(result, expected_result)
         
