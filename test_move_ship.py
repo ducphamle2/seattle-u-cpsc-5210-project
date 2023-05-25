@@ -41,4 +41,23 @@ class TestShortRangeScan(TestCase):
         result = self.game.move_ship_is_stay_in_quadrant(quadrant, start_quadrant)
         # assert
         self.assertEqual(result, expected_result)
+
+    def test_move_ship_increment_sector(self):
+        # call the method
+        result = self.game.move_ship_increment_sector(2, 0.5, 2)
+        self.assertEqual(result, 17)
+
+    @parameterized.expand([
+        (Point(1, 1), Point(1,1), 8, 8, Point(1,1), Point(0,0)),
+        (Point(0, 0), Point(0,0), 0, 0, Point(0,0), Point(0,0)),
+        (Point(1, 1), Point(1,1), 1000, 1000, Point(125,125), Point(0,0)),
+    ])
+    def test_move_ship_calculate_ship_position_quadrant_limits(self, quadrant: Point, sector: Point, sector_start_x: float, sector_start_y: float, expected_quadrant: Point, expected_sector: Point):
+        # setup
+        # Call the method
+        self.game.move_ship_calculate_ship_position_quadrant_limits(quadrant, sector, sector_start_x, sector_start_y)
+        # assert
+        self.assertEqual(quadrant, expected_quadrant)
+        self.assertEqual(sector, expected_sector)
+        
         
