@@ -10,7 +10,7 @@ docker build -t cpsc5210-startrek . && build_status=true || build_status=false
 docker-compose up -d
 
 # Run the tests
-test_results=$(docker-compose exec -T startrek sh -c "python -m unittest")
+test_results=$(docker-compose exec -T startrek sh -c "python -m unittest 2>&1")
 test_status=true
 
 # Check if the tests failed
