@@ -999,7 +999,6 @@ class Game:
         """Print a damage control report."""
         ship = self.world.ship
         self.damage_control_process_display_damage_control_report(ship.damage_stats, ship.devices)
-
         if not ship.docked:
             return
         

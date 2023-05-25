@@ -1,7 +1,7 @@
-from superstartrek import World, Game
+from superstartrek import World, Game, Ship
 from unittest import TestCase
 import sys 
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from superstartrek import Game, World
 from parameterized import parameterized
 
@@ -51,6 +51,42 @@ class TestShortRangeScan(TestCase):
         self.assertEqual(damage_sum, expected_damage_sum)
         self.assertEqual(is_valid, expected_is_valid)
 
+    def test_damage_control_ship_not_docked(self):
+        # setup
+        self.game.world.ship = Ship()
+        self.game.world.ship.docked = False
+        with patch.object(self.game, 'damage_control_calculate_damage_sum', wraps=self.game.damage_control_calculate_damage_sum) as wrapped_damage_control_calculate_damage_sum:
+            # Call the method
+            self.game.damage_control()
+            # assert
+            wrapped_damage_control_calculate_damage_sum.assert_not_called()
 
+    @patch('builtins.input')
+    def test_damage_control_ship_need_not_repair_ship(self, mock_input):
+        # setup
+        self.game.world.ship = Ship()
+        self.game.world.ship.docked = True
+        with patch.object(self.game, 'damage_control_calculate_damage_sum', wraps=self.game.damage_control_calculate_damage_sum) as wrapped_damage_control_calculate_damage_sum:
+            with patch.object(self.game, 'damage_control_reset_damage_stats', wraps=self.game.damage_control_reset_damage_stats) as wrapped_damage_control_reset_damage_stats:
+                # Call the method
+                self.game.damage_control()
+                # assert
+                wrapped_damage_control_reset_damage_stats.assert_not_called()
+                wrapped_damage_control_calculate_damage_sum.assert_called_once()
+                self.assertEqual(mock_input.call_count, 0)
+
+    @patch('builtins.input')
+    def test_damage_control_ship_need_wont_authorize_order(self, mock_input):
+        # setup
+        self.game.world.ship = Ship()
+        self.game.world.ship.docked = True
+        self.game.world.ship.damage_stats = [-1 for _ in range(8)]
+        with patch.object(self.game, 'damage_control_reset_damage_stats', wraps=self.game.damage_control_reset_damage_stats) as self_wrapped_damage_control_reset_damage_stats:
+            mock_input.return_value = 'N'
+            # Call the method
+            self.game.damage_control()
+            # assert
+            self_wrapped_damage_control_reset_damage_stats.assert_not_called()
+            self.assertEqual(mock_input.call_count, 1)
 
         
