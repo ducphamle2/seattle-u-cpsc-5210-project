@@ -31,6 +31,10 @@ python -m unittest
 python -m coverage report
 ```
 
+## 5.Run Regression Script
+```bash
+bash buildTestSuite.sh example@email.com
+```
 ### NOTES:
 
 You should make sure the python version is python:3.9.16, which is specified in the Dockerfile. Using other python versions will lead to unexpected errors
