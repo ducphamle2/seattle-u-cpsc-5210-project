@@ -1,11 +1,13 @@
 import unittest
 import sys
-from superstartrek import Point, Position, Ship
+from basic_structure import Point, Position
+from ship import Ship
+from world import World
+from superstartrek import Game
 from unittest import TestCase
 import sys 
 from unittest.mock import patch
 from parameterized import parameterized
-from superstartrek import Ship, Game, World
 from io import StringIO
 
 class TestingShip(TestCase):

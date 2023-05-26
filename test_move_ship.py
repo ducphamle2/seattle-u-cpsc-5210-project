@@ -1,7 +1,7 @@
-from superstartrek import World, Game, Point
+from world import World
+from superstartrek import Game
+from basic_structure import Point
 from unittest import TestCase
-import sys 
-from unittest.mock import patch
 from superstartrek import Game, World
 from parameterized import parameterized
 

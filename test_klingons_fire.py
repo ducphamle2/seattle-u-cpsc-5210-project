@@ -1,9 +1,8 @@
-from superstartrek import World, Game, Ship, Point, KlingonShip
+from world import World
+from ship import Ship
+from superstartrek import Game
 from unittest import TestCase
-import sys 
 from unittest.mock import patch
-from parameterized import parameterized
-from superstartrek import Ship, Game, World
 
 # @patch('superstartrek.Game.fnd')
 # @patch('superstartrek.fnr')

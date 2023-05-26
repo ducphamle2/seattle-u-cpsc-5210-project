@@ -1,8 +1,8 @@
-from superstartrek import World, Game, Ship
+from world import World
+from ship import Ship
+from superstartrek import Game
 from unittest import TestCase
-import sys 
-from unittest.mock import patch, Mock
-from superstartrek import Game, World
+from unittest.mock import patch
 from parameterized import parameterized
 
 class TestShortRangeScan(TestCase):
