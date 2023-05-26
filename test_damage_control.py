@@ -51,7 +51,7 @@ class TestShortRangeScan(TestCase):
         self.assertEqual(damage_sum, expected_damage_sum)
         self.assertEqual(is_valid, expected_is_valid)
 
-    def test_damage_control_ship_not_docked(self):
+    def test_damage_control_ship_not_docked_should_return_without_calling_calculating_damage_sum(self):
         # setup
         self.game.world.ship = Ship()
         self.game.world.ship.docked = False
@@ -62,7 +62,7 @@ class TestShortRangeScan(TestCase):
             wrapped_damage_control_calculate_damage_sum.assert_not_called()
 
     @patch('builtins.input')
-    def test_damage_control_ship_need_not_repair_ship(self, mock_input):
+    def test_damage_control_ship_need_not_repair_ship_should_return_without_calling_input(self, mock_input):
         # setup
         self.game.world.ship = Ship()
         self.game.world.ship.docked = True
@@ -76,7 +76,7 @@ class TestShortRangeScan(TestCase):
                 self.assertEqual(mock_input.call_count, 0)
 
     @patch('builtins.input')
-    def test_damage_control_ship_need_wont_authorize_order(self, mock_input):
+    def test_damage_control_ship_need_wont_authorize_order_will_return_without_calling_reset_damage_stats(self, mock_input):
         # setup
         self.game.world.ship = Ship()
         self.game.world.ship.docked = True
@@ -88,5 +88,18 @@ class TestShortRangeScan(TestCase):
             # assert
             self_wrapped_damage_control_reset_damage_stats.assert_not_called()
             self.assertEqual(mock_input.call_count, 1)
+
+    @patch('builtins.input')
+    def test_full_damage_control_should_go_through_all_logic_in_the_function(self, mock_input):
+        # setup
+        self.game.world.ship = Ship()
+        self.game.world.ship.docked = True
+        self.game.world.ship.damage_stats = [-1 for _ in range(8)]
+        self.game.world.stardate = 10
+        self.game.world.quadrant.delay_in_repairs_at_base = 0
+        mock_input.return_value = 'Y'
+        # Call the method
+        self.game.damage_control()
+        self.assertEqual(self.game.world.stardate, 10.9)
 
         

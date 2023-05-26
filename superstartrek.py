@@ -866,12 +866,12 @@ class Game:
         sector.y = int(
             sector_start_y - quadrant.y * 8
         )
-        # if sector.x < 0:
-        #     quadrant.x -= 1
-        #     sector.x = 7
-        # if sector.y < 0:
-        #     quadrant.y -= 1
-        #     sector.y = 7
+        if sector.x < 0:
+            quadrant.x -= 1
+            sector.x = 7
+        if sector.y < 0:
+            quadrant.y -= 1
+            sector.y = 7
 
     def move_ship_is_stay_in_quadrant(self, quadrant: Point, start_quadrant: Point):
         stayed_in_quadrant = (
@@ -980,7 +980,7 @@ class Game:
         damage_sum = sum(0.1 for i in range(8) if damage_stats[i] < 0)
         if damage_sum == 0:
             return damage_sum, False
-
+        
         damage_sum += delay_in_repairs_at_base
         if damage_sum >= 1:
             damage_sum = 0.9
