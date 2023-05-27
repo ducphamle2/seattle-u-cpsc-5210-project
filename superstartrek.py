@@ -102,7 +102,7 @@ class Game:
             if klingon_ship.shield <= 0:
                 continue
 
-            h = int((klingon_ship.shield / self.fnd(i)) * (random.random() + 2))
+            h = self.get_h(klingon_ship.shield, i)       
             ship.shields -= h
             klingon_ship.shield /= random.random() + 3
             print(f" {h} UNIT HIT ON ENTERPRISE FROM SECTOR {klingon_ship.sector} ")
