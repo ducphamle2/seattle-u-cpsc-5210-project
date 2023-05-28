@@ -61,6 +61,15 @@ class TestNavigationProcess(TestCase):
         self.game.navigation_print_damage_report(self.ship.damage_stats, self.ship.devices)
         self.assertTrue(print_mock.called)
 
+    @patch.object(Game, 'short_range_scan')
+    @patch.object(Game, 'navigation_klingon_ship_move')
+    @patch('builtins.input')
+    def test_navigation_integration_valid_data(self, input_mock, ship_move_mock, short_range_mock):
+        input_mock.side_effect = [3, 3, 'AYE']
+        self.game.navigation()
+        self.assertTrue(ship_move_mock.called)
+        self.assertTrue(short_range_mock.called)
+
     
     @patch.object(Quadrant, 'set_value')
     def test_navigation_klingon_ship_move(self, mock):
@@ -72,6 +81,7 @@ class TestNavigationProcess(TestCase):
             self.assertFalse(mock.called)
         else:
             self.assertTrue(mock.called)
+
     
 
 
