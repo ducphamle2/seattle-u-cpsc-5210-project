@@ -33,13 +33,20 @@ class TestNavigationProcess(TestCase):
         actual_result = self.game.navigation_calculate_world_stardate(warp_value, stardate_value)
         self.assertEqual(expected_result, actual_result)
 
-        
+    def test_navigation_repair_damage_devices(self):
+        self.ship.damage_stats = [0, 1, 0.1, 0.5, -0.1, -3, 4, 10]
+        actual_result = self.game.navigation_repair_damage_devices(2, self.ship.damage_stats, self.ship.devices)
+        expected_result = "DAMAGE CONTROL REPORT:   PHOTON TUBES REPAIR COMPLETED\n"
+        self.assertEqual(expected_result, actual_result)
+    
     @patch.object(Quadrant, 'set_value')
     def test_navigation_klingon_ship_move(self, mock):
         for klingon_ship in self.world.quadrant.klingon_ships:
-            klingon_ship.shield = 10 # value not equal to zero
+            klingon_ship.shield = 10 
         self.game.navigation_klingon_ship_move(self.world.quadrant, self.world.quadrant.klingon_ships)
         self.assertFalse(mock.called)
+
+    
 
     
 
