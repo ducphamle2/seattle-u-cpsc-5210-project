@@ -16,18 +16,24 @@ class TestKlingonsFire(TestCase):
     def test_no_klingons_in_quadrant(self, mock_end_game):
         """Test when there are no Klingons in the quadrant."""
         initial_shields = self.ship.shields
+        self.game.world = self.world
+        self.world.ship = self.ship
+        self.game.ship = self.ship
         self.world.quadrant.nb_klingons = 0
         self.game.klingons_fire()
-        self.assertEqual(self.ship.shields, initial_shields)
+        self.assertEqual(self.game.ship.shields, initial_shields)
 
     @patch.object(Game, "end_game", return_value=None)  # Mocking end_game method here
     def test_ship_docked(self, mock_end_game):
         """Test when the ship is docked."""
         self.ship.docked = True
+        self.game.world = self.world
+        self.world.ship = self.ship
+        self.game.ship = self.ship
         initial_shields = self.ship.shields
         self.world.quadrant.nb_klingons = 5
         self.game.klingons_fire()
-        self.assertEqual(self.ship.shields, initial_shields)
+        self.assertEqual(self.game.ship.shields, initial_shields)
 
     @patch('superstartrek.Game.get_h')
     @patch.object(Game, "end_game")
@@ -64,4 +70,3 @@ class TestKlingonsFire(TestCase):
         mock_get_h.return_value = 25 
         self.game.klingons_fire() 
         self.assertNotEqual(self.game.ship.damage_stats, initial_device_damage)  # Check that the damage stats have changed
-        
