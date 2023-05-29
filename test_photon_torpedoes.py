@@ -27,7 +27,6 @@ class TestPhotonTorpedoes(unittest.TestCase):
         self.game.world.ship.position.sector.y = torpedo_y
         self.game.world.quadrant.set_value(torpedo_x, torpedo_y+1, value)
         self.game.world.quadrant.klingon_ships = klingon_ships
-        # self.game.photon_torpedoes()
         with patch('builtins.print') as mock_print, patch('builtins.input', return_value=cd_input):
             self.game.photon_torpedoes()
             mock_print.assert_called_with(expected_output)
@@ -65,6 +64,8 @@ class TestPhotonTorpedoes(unittest.TestCase):
     
     @patch.object(Game, "end_game", return_value=None)  # Mocking end_game method here
     def test_photon_torpedoes_starbase_destroyed(self, end_game_mock):
+        self.game.world.ship.position.sector.x = 2
+        self.game.world.ship.position.sector.y = 2
         self.game.world.quadrant.get_value = lambda x, y: Entity.starbase  # Mocking get_value() function
         self.game.world.quadrant.nb_bases = 1
         self.game.world.bases_in_galaxy = 1
@@ -72,8 +73,6 @@ class TestPhotonTorpedoes(unittest.TestCase):
         self.game.world.stardate = 200
         self.game.world.initial_stardate = 100
         self.game.world.mission_duration = 50
-  
-
         with patch('builtins.input', return_value='1'):  # Set cd = 1
             with patch('builtins.print') as mock_print:
                 self.game.photon_torpedoes()
