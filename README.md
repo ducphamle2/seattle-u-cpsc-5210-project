@@ -29,6 +29,9 @@ python -m unittest
 
 # code coverage. (need to run all tests before generating the code coverage report. Eg: python -m coverage run -m unittest && coverage report)
 python -m coverage report
+
+# code coverage html
+coverage html
 ```
 
 ## 5.Run Regression Script

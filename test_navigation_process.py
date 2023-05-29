@@ -6,7 +6,7 @@ from quadrant import Quadrant
 from basic_structure import Point, QuadrantData, KlingonShip, Entity
 from unittest import TestCase
 import unittest.mock
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from parameterized import parameterized
 import random
 from random import Random
@@ -69,6 +69,28 @@ class TestNavigationProcess(TestCase):
         self.game.navigation()
         self.assertTrue(ship_move_mock.called)
         self.assertTrue(short_range_mock.called)
+
+    @patch.object(Game, 'navigation_process_warp')
+    @patch('builtins.input')
+    def test_navigation_integration_course_data_invalid_should_return(self, input_mock, navigation_process_warp):
+        input_mock.side_effect = [-1]
+        self.game.navigation()
+        self.assertTrue(navigation_process_warp.not_called)
+
+    @patch.object(Game, 'navigation_process_warp_rounds')
+    @patch('builtins.input')
+    def test_navigation_integration_process_warp_invalid_should_return(self, input_mock, navigation_process_warp_rounds):
+        input_mock.side_effect = [3, -1]
+        self.game.navigation()
+        self.assertTrue(navigation_process_warp_rounds.not_called)
+
+    @patch.object(Game, 'navigation_klingon_ship_move')
+    @patch('builtins.input')
+    def test_navigation_integration_navigation_klingon_ship_move_invalid_should_return(self, input_mock, navigation_klingon_ship_move):
+        input_mock.side_effect = [3, 3]
+        self.game.world.ship.energy = 0
+        self.game.navigation()
+        self.assertTrue(navigation_klingon_ship_move.not_called)
 
     
     @patch.object(Quadrant, 'set_value')
