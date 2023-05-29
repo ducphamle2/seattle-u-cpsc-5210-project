@@ -1,0 +1,33 @@
+name: Regression Testing
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install mailutils
+        run: |
+          sudo apt-get upgrade
+          sudo apt-get install -y mailutils
+      - name: Switch docker driver
+        run: |
+          docker buildx create --use --driver=docker-container
+      - name: Build images with caching
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: "cpsc5210-startrek:0.0.1"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run test suite
+        run: |
+          chmod +x ./buildTestSuite.sh
+          ./buildTestSuite.sh ${{ secrets.RECEIVE_EMAIL }}
+        shell: bash
