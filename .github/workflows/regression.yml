@@ -2,8 +2,6 @@ name: Regression Testing
 
 on:
   push:
-    branches: ["feat/cicd-tests"]
-  pull_request:
     branches: ["main"]
 
 jobs:
