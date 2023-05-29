@@ -5,6 +5,8 @@ from basic_structure import Point, QuadrantData, Position, KlingonShip
 from unittest import TestCase
 from unittest.mock import patch
 from parameterized import parameterized
+import random
+from random import Random
 from world import World
 from ship import Ship
 from superstartrek import Game
@@ -41,6 +43,15 @@ class PhaserControlTest(TestCase):
         game.world.ship.damage_stats[7] = -8
         game.check_computer_accuracy(game.world.ship)
         print_mock.assert_called_with('COMPUTER FAILURE HAMPERS ACCURACY')
+
+    @patch('superstartrek.random')
+    def test_get_random_multiplier(self, random_mock):
+        game = Game()
+        random_value = Random(500)
+        print(random_value.random())
+        random_mock.random.return_value = random_value.random()
+        returned_random_value = game.get_random_multiplier()
+        self.assertEqual(returned_random_value, 0.9494675437116505)
 
 
     @parameterized.expand([
