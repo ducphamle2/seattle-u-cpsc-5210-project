@@ -47,12 +47,22 @@ class PhaserControlTest(TestCase):
     @patch('superstartrek.random')
     def test_get_random_multiplier(self, random_mock):
         game = Game()
-        random_value = Random(500)
-        print(random_value.random())
+        random_value = Random(100)
         random_mock.random.return_value = random_value.random()
-        returned_random_value = game.get_random_multiplier()
-        self.assertEqual(returned_random_value, 0.9494675437116505)
-
+        actual_random_value = game.get_random_multiplier()
+        self.assertEqual(actual_random_value, 0.1456692551041303)
+    
+    @patch.object(Game, 'fnd')
+    @patch('superstartrek.random')
+    def test_get_h(self, fnd_mock, random_mock):
+        game = Game()
+        game.world = World()
+        game.world.quadrant.klingon_ships.append(KlingonShip(sector=Point(1, 1), shield=100.0))
+        random_value = Random(500)
+        random_mock.random.side_effect = random_value.random()
+        fnd_mock.side_effect = 0
+        game.get_h(650, 5)
+        random_mock.assert_called
 
     @parameterized.expand([
         (["10"], 10, 20),  # case where user input is less than ship energy
