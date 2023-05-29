@@ -179,6 +179,53 @@ class PhaserControlTest(TestCase):
 
             assert klingon_ship.shield == expected_remaining_shield
 
+    @patch.object(Game, 'klingons_fire')
+    @patch.object(Game, 'fire_phasers_on_klingon')
+    @patch.object(Game, 'get_phaser_per_klingon')
+    @patch.object(Game, 'adjust_phaser_firepower')
+    @patch.object(Game, 'adjust_ship_energy')
+    @patch.object(Game, 'get_phaser_firepower')
+    @patch('superstartrek.print')
+    @patch.object(Game, 'check_computer_accuracy')
+    @patch.object(Game, 'check_no_klingons')
+    @patch.object(Game, 'check_phasers_operational')
+    def test_phaser_control_integration(self, phasers_operational_mock, no_klingons_mock, 
+                                        computer_mock, print_mock, phaser_firepower_mock, 
+                                        ship_energy_mock, 
+                                        adjust_firepower_mock, phaser_klingon_mock,
+                                        fire_phasers_mock, klingons_fire_mock):
+        game = Game()
+        game.world = World()
+        game.world.ship.damage_stats[7] = 57
+        phasers_operational_mock.return_value = True
+        no_klingons_mock.return_value = False
+        game.phaser_control()
+        computer_mock.assert_called
+        print_mock.assert_called
+        phaser_firepower_mock.assert_called
+        ship_energy_mock.assert_called
+        adjust_firepower_mock.assert_called
+        phaser_klingon_mock.assert_called
+        fire_phasers_mock.assert_called
+        klingons_fire_mock.assert_called 
+    
+    @patch('superstartrek.print')
+    def test_phaser_control_integration_phasers_not_operational(self, print_mock):
+        game = Game()
+        game.world = World()
+        game.world.ship.damage_stats[3] = -10
+        game.phaser_control()
+        print_mock.assert_not_called
+    
+    @patch.object(Game, 'check_no_klingons')
+    @patch.object(Game, 'check_computer_accuracy')
+    def test_phaser_control_integration_no_klingons(self, computer_mock, no_klingons_mock):
+        game = Game()
+        game.world = World()
+        no_klingons_mock.return_value = True
+        game.phaser_control()
+        computer_mock.assert_not_called
+
 
 
 
