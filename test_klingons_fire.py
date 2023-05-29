@@ -36,26 +36,40 @@ class TestKlingonsFire(TestCase):
         self.game.klingons_fire()
         self.assertEqual(self.game.ship.shields, initial_shields)
 
-    @parameterized.expand([
-        (-100.0),
-        (100.0)
-    ])
     @patch('superstartrek.Game.get_h')
     @patch.object(Game, "end_game")
-    def test_klingons_fire_on_ship_destroyed(self, klingon_ship_shield, mock_end_game, mock_get_h):
+    def test_klingons_fire_on_ship_destroyed(self, mock_end_game, mock_get_h):
         """Test when Klingons fire on the ship."""
         self.ship.shields = 100  # Initialize the ship's shields to 100
         initial_shields = self.ship.shields
         mock_get_h.return_value = 100 
         self.world.quadrant.nb_klingons = 5
-        klingon_ship = KlingonShip(Point(1, 1), klingon_ship_shield)
+        klingon_ship = KlingonShip(Point(1, 1), 100.0)
         self.world.quadrant.klingon_ships.append(klingon_ship)
         self.game.world = self.world
         self.world.ship = self.ship
-        self.game.ship = self.ship
+        self.game.world.ship = self.ship
         self.game.klingons_fire()
-        self.assertNotEqual(self.game.ship.shields, initial_shields)
-        self.assertEqual(self.game.ship.shields, 0)
+        self.assertNotEqual(self.ship.shields, initial_shields)
+        self.assertEqual(self.ship.shields, 0)
+        mock_end_game.assert_called_with(won=False, quit=False, enterprise_killed=True)
+    
+    @patch('superstartrek.Game.get_h')
+    @patch.object(Game, "end_game")
+    def test_klingons_fire_on_ship_destroyed_shield_0_or_lesser(self, mock_end_game, mock_get_h):
+        """Test when Klingons fire on the ship."""
+        self.ship.shields = 100  # Initialize the ship's shields to 100
+        initial_shields = self.ship.shields
+        mock_get_h.return_value = 100 
+        self.world.quadrant.nb_klingons = 5
+        klingon_ship = KlingonShip(Point(1, 1), -100.0)
+        self.world.quadrant.klingon_ships.append(klingon_ship)
+        self.game.world = self.world
+        self.world.ship = self.ship
+        self.game.world.ship = self.ship
+        self.game.klingons_fire()
+        self.assertNotEqual(self.ship.shields, initial_shields)
+        self.assertEqual(self.ship.shields, 0)
         mock_end_game.assert_called_with(won=False, quit=False, enterprise_killed=True)
 
     @patch('superstartrek.Game.get_h')
