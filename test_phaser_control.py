@@ -34,6 +34,13 @@ class PhaserControlTest(TestCase):
         world.quadrant.nb_klingons = nb_klingons
         assert game.check_no_klingons(world) == expected_result
 
+    @patch('superstartrek.print')
+    def test_check_computer_accuracy_damage_stats_at_7_less_than_0(self, print_mock):
+        game = Game()
+        game.world = World()
+        game.world.ship.damage_stats[7] = -8
+        game.check_computer_accuracy(game.world.ship)
+        print_mock.assert_called_with('COMPUTER FAILURE HAMPERS ACCURACY')
 
 
     @parameterized.expand([
