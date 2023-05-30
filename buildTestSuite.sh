@@ -12,5 +12,6 @@ if echo "$test_results" | grep -q "FAILED"; then
   test_status=false
 fi
 
+
 # Send the email
 echo -e "Test Status: $test_status" | mail -s "Build and Test Results" $email
