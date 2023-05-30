@@ -2,7 +2,7 @@ version: '3.3'
 services:
   startrek:
     container_name: startrek
-    image: cpsc5210-startrek
+    image: cpsc5210-startrek:0.0.1
     working_dir: /workspace
     tty: true
     volumes:
