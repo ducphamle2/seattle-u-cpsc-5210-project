@@ -3,8 +3,8 @@ from unittest import TestCase
 from world import World
 from superstartrek import Game
 import superstartrek as sst
-from basic_structure import Point, QuadrantData
-from unittest.mock import patch, MagicMock
+from basic_structure import Point
+from unittest.mock import patch
 from unittest import mock
 from io import StringIO
 
