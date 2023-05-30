@@ -25,7 +25,7 @@ docker-compose exec startrek sh -c 'python -m unittest -b -v'
 docker-compose exec startrek sh -c 'python -m coverage report --omit=test_*.py'
 
 # code coverage html
-docker-compose exec startrek sh -c 'coverage html'
+docker-compose exec startrek sh -c 'coverage html --omit=test_*.py'
 ```
 
 ## 5.Run Regression Script
