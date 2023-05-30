@@ -897,11 +897,6 @@ class Game:
         self.restart = True
 
 
-def fnr() -> int:
-    """Generate a random integer from 0 to 7 inclusive."""
-    return random.randint(0, 7)
-
-
 def print_scan_results(
     quadrant: Point,
     galaxy_map: List[List[QuadrantData]],
