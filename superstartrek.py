@@ -501,12 +501,6 @@ class Game:
             damage_stats[device] -= random.random() * 5 + 1
             print(f"DAMAGE CONTROL REPORT:   {devices[device]} DAMAGED\n")
             return
-        
-        damage_stats[device] += random.random() * 3 + 1
-        print(
-            f"DAMAGE CONTROL REPORT:   {devices[device]} STATE OF REPAIR IMPROVED\n"
-        )
-        return
 
     def navigation(self) -> None:
         """
@@ -573,12 +567,6 @@ class Game:
         sector.y = int(
             sector_start_y - quadrant.y * 8
         )
-        if sector.x < 0:
-            quadrant.x -= 1
-            sector.x = 7
-        if sector.y < 0:
-            quadrant.y -= 1
-            sector.y = 7
 
     def move_ship_is_stay_in_quadrant(self, quadrant: Point, start_quadrant: Point):
         stayed_in_quadrant = (

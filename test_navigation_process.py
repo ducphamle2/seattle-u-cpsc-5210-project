@@ -38,20 +38,20 @@ class TestNavigationProcess(TestCase):
         self.assertEqual(expected_result, actual_result)
 
     def test_navigation_repair_damage_devices(self):
-        self.ship.damage_stats = [0, 1, 0.1, 0.5, -0.1, -3, 4, 10]
-        actual_result = self.game.navigation_repair_damage_devices(2, self.ship.damage_stats, self.ship.devices)
+        damage_stats = [0, 1, 0.1, -1.01, -0.1, -3, 4, 10]
+        actual_result = self.game.navigation_repair_damage_devices(2, damage_stats, self.ship.devices)
         expected_result = "DAMAGE CONTROL REPORT:   PHOTON TUBES REPAIR COMPLETED\n"
         self.assertEqual(expected_result, actual_result)
+        self.assertEqual(damage_stats[3], -0.1)
     
     @patch('superstartrek.print')
     @patch('superstartrek.random')
     def test_navigation_print_damage_report_random_greater_than_0_point_2(self, random_mock, print_mock):
         # Seed Random() so as to generate value greater than 0.2
-        random_value = Random(15)
-        random_mock.random.return_value = random_value.random()
+        random_mock.random.return_value = 0.21
         self.game.navigation_print_damage_report(self.ship.damage_stats, self.ship.devices)
         self.assertFalse(print_mock.called)
-    
+
     @patch('superstartrek.print')
     @patch('superstartrek.random')
     def test_navigation_print_damage_report_random_greater_less_than_equal_0_point_2(self, random_mock, print_mock):

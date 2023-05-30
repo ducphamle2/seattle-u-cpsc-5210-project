@@ -1,6 +1,6 @@
 from world import World
 from superstartrek import Game
-from basic_structure import Point
+from basic_structure import Point, Entity
 from unittest import TestCase
 from superstartrek import Game, World
 from parameterized import parameterized
@@ -60,4 +60,15 @@ class TestShortRangeScan(TestCase):
         self.assertEqual(quadrant, expected_quadrant)
         self.assertEqual(sector, expected_sector)
         
-        
+    
+    def test_move_ship_shut_down_sector_bad_navigation_void_entity_should_return_false(self):
+        # setup
+        # Call the method
+        result = self.game.move_ship_shut_down_sector_bad_navigation(Point(0,0), Entity.void, 0, 0)
+        self.assertEqual(result, False)
+
+    def test_move_ship_shut_down_sector_bad_navigation_not_void_entity_should_return_true(self):
+        # setup
+        # Call the method
+        result = self.game.move_ship_shut_down_sector_bad_navigation(Point(0,0), Entity.klingon, 0, 0)
+        self.assertEqual(result, True)
