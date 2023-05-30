@@ -4,7 +4,10 @@
 email=$1
 
 # Start the container
-docker-compose up -d && build_status=true || build_status=false
+build_status=true
+if docker-compose up -d | grep -q "ERROR"; then
+  build_status=false
+fi
 
 # Run the tests
 test_results=$(docker-compose exec -T startrek sh -c "python -m unittest 2>&1")
