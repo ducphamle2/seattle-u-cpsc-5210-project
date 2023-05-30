@@ -5,7 +5,7 @@
 ## 2. Build the docker image
 
 ```bash
-docker build -t cpsc5210-startrek .
+docker build -t cpsc5210-startrek:0.0.1 .
 ```
 
 ## 3. Start the container
