@@ -14,24 +14,18 @@ docker build -t cpsc5210-startrek .
 docker-compose up -d
 ```
 
-## 4. Start The container shell
-
-```bash
-docker-compose exec startrek sh
-```
-
 ## 4. Run tests
 
 ```python
 
 # run all tests
-python -m unittest -b -v
+docker-compose exec startrek sh -c 'python -m unittest -b -v'
 
 # code coverage. (need to run all tests before generating the code coverage report. Eg: python -m coverage run -m unittest -b -v && coverage report --omit=test_*.py)
-python -m coverage report --omit=test_*.py
+docker-compose exec startrek sh -c 'python -m coverage report --omit=test_*.py'
 
 # code coverage html
-coverage html
+docker-compose exec startrek sh -c 'coverage html'
 ```
 
 ## 5.Run Regression Script
