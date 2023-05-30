@@ -25,10 +25,10 @@ docker-compose exec startrek sh
 ```python
 
 # run all tests
-python -m unittest
+python -m unittest -b -v
 
-# code coverage. (need to run all tests before generating the code coverage report. Eg: python -m coverage run -m unittest && coverage report)
-python -m coverage report
+# code coverage. (need to run all tests before generating the code coverage report. Eg: python -m coverage run -m unittest -b -v && coverage report --omit=test_*.py)
+python -m coverage report --omit=test_*.py
 
 # code coverage html
 coverage html
