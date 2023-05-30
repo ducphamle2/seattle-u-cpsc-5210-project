@@ -35,6 +35,9 @@ coverage html
 ```
 
 ## 5.Run Regression Script
+
+The below command should be run outside of the docker container
+
 ```bash
 bash buildTestSuite.sh example@email.com
 ```
