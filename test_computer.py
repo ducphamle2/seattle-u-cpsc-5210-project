@@ -49,7 +49,7 @@ class ComputerTest(TestCase):
         mock_input.side_effect = ['0', '-1']
         self.game.world.ship.position.quadrant = 3
         self.game.computer()
-        expected_output = ("\n\n        COMPUTER RECORD OF GALAXY FOR QUADRANT 3\n\n"
+        expected_output = ("\n\n        COMPUTER  OF GALAXY FOR QUADRANT 3\n\n"
                "       1     2     3     4     5     6     7     8\n"
                 "     ----- ----- ----- ----- ----- ----- ----- -----\n"
                 " 1    ***   ***   ***   ***   ***   ***   ***   ***\n"
