@@ -3,11 +3,8 @@
 # The email address to send the status to
 email=$1
 
-# Build the docker container
-docker build -t cpsc5210-startrek . && build_status=true || build_status=false
-
 # Start the container
-docker-compose up -d
+docker-compose up -d && build_status=true || build_status=false
 
 # Run the tests
 test_results=$(docker-compose exec -T startrek sh -c "python -m unittest 2>&1")
