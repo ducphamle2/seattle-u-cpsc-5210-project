@@ -7,6 +7,7 @@ email=$1
 docker-compose up -d && build_status=true || build_status=false
 
 # Run the tests
+echo "Running the tests ..."
 test_results=$(docker-compose exec -T startrek sh -c "python -m unittest 2>&1")
 test_status=true
 
@@ -14,6 +15,8 @@ test_status=true
 if echo "$test_results" | grep -q "FAILED"; then
   test_status=false
 fi
+
+echo "Finish running the tests. Preparing to send an email"
 
 # Send the email
 echo -e "Build Status: $build_status\nTest Status: $test_status" | mail -s "Build and Test Results" $email
