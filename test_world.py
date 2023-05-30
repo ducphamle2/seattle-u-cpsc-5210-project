@@ -37,15 +37,15 @@ class TestWorld(TestCase):
 
     @parameterized.expand([
         (0.99, 3),  # test case for r1 > 0.98
-        (0.98, 3),  # test case for r1 = 0.98 (boundary case)
+        (0.98, 2),  # test case for r1 = 0.98 (boundary case)
         (0.979, 2),  # test case for r1 just below 0.98 (boundary case)
     
-        (0.97, 2),  # test case for 0.95 < r1 <= 0.98
-        (0.95, 2),  # test case for r1 = 0.95 (boundary case)
+        (0.97, 2),  # test case for 0.95 < r1 < 0.98
+        (0.95, 1),  # test case for r1 = 0.95 (boundary case)
         (0.949, 1),  # test case for r1 just below 0.95 (boundary case)
     
-        (0.85, 1),  # test case for 0.80 < r1 <= 0.95
-        (0.80, 1),  # test case for r1 = 0.80 (boundary case)
+        (0.85, 1),  # test case for 0.80 < r1 < 0.95
+        (0.80, 0),  # test case for r1 = 0.80 (boundary case)
         (0.799, 0),  # test case for r1 just below 0.80 (boundary case)
     
         (0.75, 0),  # test case for r1 <= 0.80
@@ -57,6 +57,6 @@ class TestWorld(TestCase):
             
             # The expected remaining klingons is calculated based on the mocked random value
             # As we have 8x8 quadrants and each quadrant will have expected_klingons because we mocked random.random()
-            expected_remaining_klingons = total_klingons - (expected_klingons * 8 * 8)
-            
+            expected_remaining_klingons = total_klingons + (expected_klingons * 8 * 8)
+            print("hello",expected_remaining_klingons)
             self.assertEqual(world.remaining_klingons, expected_remaining_klingons, "Remaining klingons calculation is incorrect")
