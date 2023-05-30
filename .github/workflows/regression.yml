@@ -26,6 +26,7 @@ jobs:
           tags: "cpsc5210-startrek:0.0.1"
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
       - name: Run test suite
         run: |
           chmod +x ./buildTestSuite.sh
