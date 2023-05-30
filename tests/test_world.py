@@ -58,5 +58,4 @@ class TestWorld(TestCase):
             # The expected remaining klingons is calculated based on the mocked random value
             # As we have 8x8 quadrants and each quadrant will have expected_klingons because we mocked random.random()
             expected_remaining_klingons = total_klingons + (expected_klingons * 8 * 8)
-            print("hello",expected_remaining_klingons)
             self.assertEqual(world.remaining_klingons, expected_remaining_klingons, "Remaining klingons calculation is incorrect")
