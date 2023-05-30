@@ -4,8 +4,9 @@
 email=$1
 
 # Start the container
+build_result=$(docker-compose up -d)
 build_status=true
-if docker-compose up -d | grep -q "ERROR"; then
+if echo "$build_result" | grep -q "ERROR"; then
   build_status=false
 fi
 
